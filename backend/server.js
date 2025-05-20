@@ -5,6 +5,8 @@ const userRoutes = require('./routes/userRoutes');
 const supplierRoutes = require('./routes/supplierRoutes');
 const uploadRoutes = require('./routes/uploadRoutes');
 const path = require('path');
+const productRoutes = require('./routes/productRoutes');
+
 
 const app = express();
 app.use(cors());
@@ -25,6 +27,7 @@ mongoose.connect('mongodb://localhost:27017/crud_flutter', {
 app.use('/api/users', userRoutes);
 app.use('/api/suppliers', supplierRoutes);
 app.use('/api/uploads', uploadRoutes);
+app.use('/api/products', productRoutes);
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {

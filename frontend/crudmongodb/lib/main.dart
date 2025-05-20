@@ -1,4 +1,6 @@
 import 'package:crudmongodb/login.dart';
+import 'package:crudmongodb/product/form_product.dart';
+import 'package:crudmongodb/product/show_product.dart';
 import 'package:crudmongodb/setting/setting.dart';
 import 'package:crudmongodb/supplier/show_supplier.dart';
 import 'package:crudmongodb/uploadimage/form_upload.dart';
@@ -22,7 +24,7 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'Flutter CRUD',
       theme: ThemeData(primarySwatch: Colors.blue),
-      home: ResponsiveLayout(),
+      home: ShowProduct(),
     );
   }
 }
