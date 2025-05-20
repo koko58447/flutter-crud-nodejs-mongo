@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import '../constants.dart';
 
 class ProductForm extends StatefulWidget {
   final Map? product;
@@ -41,7 +42,7 @@ class _ProductFormState extends State<ProductForm> {
   Future<void> _fetchSuppliers() async {
     try {
       final response = await http.get(
-        Uri.parse('http://192.168.70.64:5000/api/suppliers'),
+        Uri.parse('$apiBaseUrl/api/suppliers'),
       );
 
       if (response.statusCode == 200) {
@@ -75,8 +76,8 @@ class _ProductFormState extends State<ProductForm> {
     if (_formKey.currentState!.validate()) {
       try {
         final url = widget.product != null && widget.product!['_id'] != null
-            ? 'http://192.168.70.64:5000/api/products/${widget.product!['_id']}'
-            : 'http://192.168.70.64:5000/api/products';
+            ? '$apiBaseUrl/api/products/${widget.product!['_id']}'
+            : '$apiBaseUrl/api/products';
 
         final body = {
           'name': _nameController.text,

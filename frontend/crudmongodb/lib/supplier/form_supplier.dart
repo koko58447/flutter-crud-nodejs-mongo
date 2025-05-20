@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'dart:io';
+import '../constants.dart';
 
 class SupplierForm extends StatefulWidget {
   final Map? supplier;
@@ -56,8 +57,8 @@ class _SupplierFormState extends State<SupplierForm> {
     if (_formKey.currentState!.validate()) {
       try {
         final url = widget.supplier != null && widget.supplier!['_id'] != null
-            ? 'http://192.168.70.64:5000/api/suppliers/${widget.supplier!['_id']}'
-            : 'http://192.168.70.64:5000/api/suppliers';
+            ? '$apiBaseUrl/api/suppliers/${widget.supplier!['_id']}'
+            : '$apiBaseUrl/api/suppliers';
 
         final body = {
           'name': _nameController.text,

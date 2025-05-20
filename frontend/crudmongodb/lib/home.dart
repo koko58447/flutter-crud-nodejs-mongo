@@ -10,6 +10,7 @@ import 'dart:html' as html;
 import 'dart:typed_data';
 import 'package:excel/excel.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
+import 'constants.dart';
 
 class Home extends StatefulWidget {
   @override
@@ -28,7 +29,7 @@ class _HomeState extends State<Home> {
     });
     try {
       final response =
-          await http.get(Uri.parse('http://192.168.70.64:5000/api/users'));
+          await http.get(Uri.parse('$apiBaseUrl/api/users'));
       if (response.statusCode == 200) {
         setState(() {
           users = json.decode(response.body);
@@ -107,7 +108,7 @@ class _HomeState extends State<Home> {
       try {
         // Example: API call to delete user from DB
         final response = await http.delete(
-          Uri.parse('http://192.168.70.64:5000/api/users/${user['_id']}'),
+          Uri.parse('$apiBaseUrl/api/users/${user['_id']}'),
         );
 
         if (response.statusCode == 200) {

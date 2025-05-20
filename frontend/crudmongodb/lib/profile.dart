@@ -106,7 +106,7 @@ class ProfilePage extends StatelessWidget {
                     label: const Text('Logout'),
                     style: ElevatedButton.styleFrom(
                       minimumSize: const Size(double.infinity, 50),
-                      primary: Colors.red,
+                      // primary: Colors.red,
                     ),
                   ),
                 ],

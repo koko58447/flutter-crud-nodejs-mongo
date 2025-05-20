@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import '../constants.dart';
+import '../utils.dart';
+import 'form_product.dart';
 
+// Main ShowProduct Widget
 class ShowProduct extends StatefulWidget {
   @override
   _ShowProductState createState() => _ShowProductState();
@@ -12,7 +17,6 @@ class _ShowProductState extends State<ShowProduct> {
   List _filteredProducts = [];
   bool _isLoading = true;
   String _searchText = "";
-
   @override
   void initState() {
     super.initState();
@@ -22,7 +26,7 @@ class _ShowProductState extends State<ShowProduct> {
   Future<void> _fetchProductsWithSuppliers() async {
     try {
       final response = await http.get(
-        Uri.parse('http://192.168.70.64:5000/api/products/productsupplier'),
+        Uri.parse('$apiBaseUrl/api/products/productsupplier'),
       );
 
       if (response.statusCode == 200) {
@@ -71,65 +75,7 @@ class _ShowProductState extends State<ShowProduct> {
     });
   }
 
-  Future<void> _editProduct(Map product, List suppliers) async {
-    TextEditingController nameController =
-        TextEditingController(text: product['name']);
-    TextEditingController priceController =
-        TextEditingController(text: product['price'].toString());
-    int? selectedSupplierId = product['supplierid'];
-
-    await showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text("Edit Product"),
-        content: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: nameController,
-                decoration: const InputDecoration(labelText: "Product Name"),
-              ),
-              TextField(
-                controller: priceController,
-                decoration: const InputDecoration(labelText: "Price"),
-                keyboardType: TextInputType.number,
-              ),
-              DropdownButtonFormField<int>(
-                value: selectedSupplierId,
-                decoration: const InputDecoration(labelText: "Supplier"),
-                items: suppliers.map((supplier) {
-                  return DropdownMenuItem<int>(
-                    value: supplier['id'],
-                    child: Text(supplier['name']),
-                  );
-                }).toList(),
-                onChanged: (value) {
-                  selectedSupplierId = value;
-                },
-              ),
-            ],
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-            },
-            child: const Text("Cancel"),
-          ),
-          TextButton(
-            onPressed: () {
-              // Save product logic here
-              Navigator.of(context).pop();
-            },
-            child: const Text("Save"),
-          ),
-        ],
-      ),
-    );
-  }
-
+ 
   Future<void> _deleteProduct(Map product) async {
     final confirm = await showDialog(
       context: context,
@@ -152,7 +98,7 @@ class _ShowProductState extends State<ShowProduct> {
     if (confirm == true) {
       try {
         final response = await http.delete(
-          Uri.parse('http://192.168.70.64:5000/api/products/${product['_id']}'),
+          Uri.parse('$apiBaseUrl/api/products/${product['_id']}'),
         );
 
         if (response.statusCode == 200) {
@@ -177,6 +123,7 @@ class _ShowProductState extends State<ShowProduct> {
       }
     }
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -204,50 +151,255 @@ class _ShowProductState extends State<ShowProduct> {
           ? const Center(child: CircularProgressIndicator())
           : _filteredProducts.isEmpty
               ? const Center(child: Text('No products found.'))
-              : ListView.builder(
-                  itemCount: _filteredProducts.length,
-                  itemBuilder: (context, index) {
-                    final product = _filteredProducts[index];
-                    final supplierDetails = product['supplierDetails'];
-                    return Padding(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 8.0, vertical: 4.0),
-                      child: Card(
-                        elevation: 4,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: ListTile(
-                          title: Text(
-                            product['name'],
-                            style: const TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
+              : LayoutBuilder(
+                  builder: (context, constraints) {
+                    if (constraints.maxWidth < 700) {
+                      return MobileProductListView(
+                        products: _filteredProducts,
+                        onEdit: (Map product) {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => ProductForm(
+                                product: product,
+                              ),
                             ),
-                          ),
-                          subtitle: Text(
-                              'Price: \$${product['price']} | Quantity: ${product['qty']}'),
-                          trailing: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              IconButton(
-                                icon:
-                                    const Icon(Icons.edit, color: Colors.blue),
-                                onPressed: () =>
-                                    _editProduct(product, supplierDetails),
+                          ).then((result) {
+                            if (result == true) _fetchProductsWithSuppliers();
+                          });
+                        },
+                        onDelete: _deleteProduct,
+                      );
+                    } else {
+                      return DesktopProductTableView(
+                        products: _filteredProducts,
+                        onEdit: (Map product) {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => ProductForm(
+                                product: product,
                               ),
-                              IconButton(
-                                icon:
-                                    const Icon(Icons.delete, color: Colors.red),
-                                onPressed: () => _deleteProduct(product),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    );
+                            ),
+                          ).then((result) {
+                            if (result == true) _fetchProductsWithSuppliers();
+                          });
+                        },
+                        onDelete: _deleteProduct,
+                      );
+                    }
                   },
                 ),
+            floatingActionButton: SpeedDial(
+        icon: Icons.add, // Main FAB icon
+        activeIcon: Icons.close, // Icon when FAB is expanded
+        backgroundColor: Colors.blue,
+        foregroundColor: Colors.white,
+        children: [
+          SpeedDialChild(
+            child: const Icon(Icons.file_download),
+            label: 'Export CSV',
+            backgroundColor: Colors.green,
+  onTap: () => exportListToCSV(
+    data: _filteredProducts,
+    headers: ["Name", "Price", "Supplier", "Qty"],
+    fields: ['name', 'price', 'supplierid', 'qty'],
+    fileName: 'product.csv',
+  ), // Call the exportToCSV function
+          ),
+          SpeedDialChild(
+            child: const Icon(Icons.table_chart),
+            label: 'Export Excel',
+            backgroundColor: Colors.orange,
+            onTap: () => exportListToExcel(
+  data: _filteredProducts,
+  sheetName: 'Product',
+  headers: ["Name", "Price", "Supplier", "Qty"],
+  fields: ['name', 'price', 'supplierid', 'qty'],
+  fileName: 'products.xlsx',
+), // Call the exportToExcel function
+          ),
+          SpeedDialChild(
+            child: const Icon(Icons.add),
+            label: 'Add Product',
+            backgroundColor: Colors.blue,
+            onTap: () async {
+               final result = await Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => ProductForm()),
+          );
+          if (result == true) _fetchProductsWithSuppliers();
+            },
+          ),
+        ],
+      ),
     );
   }
+}
+
+class MobileProductListView extends StatelessWidget {
+  final List products;
+  final Function(Map) onEdit;
+  final Function(Map) onDelete;
+
+  const MobileProductListView({
+    required this.products,
+    required this.onEdit,
+    required this.onDelete,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView.builder(
+      itemCount: products.length,
+      itemBuilder: (context, index) {
+        final product = products[index];
+        return Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+          child: Card(
+            elevation: 4,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: ListTile(
+              title: Text(
+                product['name'],
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              subtitle: Text(
+                  'Price: \$${product['price']} | Quantity: ${product['qty']}'),
+              trailing: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.edit, color: Colors.blue),
+                    onPressed: () => onEdit(product),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.delete, color: Colors.red),
+                    onPressed: () => onDelete(product),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
+
+class DesktopProductTableView extends StatefulWidget {
+  final List products;
+  final Function(Map) onEdit;
+  final Function(Map) onDelete;
+
+  const DesktopProductTableView({
+    required this.products,
+    required this.onEdit,
+    required this.onDelete,
+  });
+
+  @override
+  State<DesktopProductTableView> createState() => _DesktopProductTableViewState();
+}
+
+class _DesktopProductTableViewState extends State<DesktopProductTableView> {
+  int _rowsPerPage = 10;
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return SingleChildScrollView(
+          child: Column(
+            children: [
+              ConstrainedBox(
+                constraints: BoxConstraints(
+                  minWidth: constraints.maxWidth,
+                ),
+                child: PaginatedDataTable(
+                  header: const Text('Products with Suppliers'),
+              columns: const [
+                DataColumn(label: Text('Name')),
+                DataColumn(label: Text('Price')),
+                DataColumn(label: Text('Quantity')),
+                DataColumn(label: Text('Supplier')),
+                DataColumn(label: Text('Actions')),
+              ],
+              source: _ProductDataSource(
+                products: widget.products,
+                onEdit: widget.onEdit,
+                onDelete: widget.onDelete,
+              ),
+                  rowsPerPage: 10, // Number of rows per page
+                  columnSpacing: 20,
+                  horizontalMargin: 10,
+                  showCheckboxColumn: false, // Hide checkbox column
+                ),
+              ),
+              const SizedBox(height: 60), // Add spacing below the table
+            ],
+          ),
+        );
+      },
+    );
+  }
+}
+
+
+class _ProductDataSource extends DataTableSource {
+  final List products;
+  final Function(Map) onEdit;
+  final Function(Map) onDelete;
+
+  _ProductDataSource({
+    required this.products,
+    required this.onEdit,
+    required this.onDelete,
+  });
+
+  @override
+  DataRow? getRow(int index) {
+    if (index >= products.length) return null;
+    final product = products[index];
+    final supplierDetails = product['supplierDetails'];
+    return DataRow(
+      cells: [
+        DataCell(Text(product['name'] ?? '')),
+        DataCell(Text(product['price'].toString())),
+        DataCell(Text(product['qty'].toString())),
+        DataCell(Text(
+          supplierDetails != null && supplierDetails.isNotEmpty
+              ? supplierDetails['name'] ?? ''
+              : 'N/A',
+        )),
+        DataCell(Row(
+           mainAxisSize: MainAxisSize.min,
+          children: [
+            IconButton(
+              icon: const Icon(Icons.edit, color: Colors.blue),
+              onPressed: () => onEdit(product),
+            ),
+            IconButton(
+              icon: const Icon(Icons.delete, color: Colors.red),
+              onPressed: () => onDelete(product),
+            ),
+          ],
+        )),
+      ],
+    );
+  }
+
+  @override
+  bool get isRowCountApproximate => false;
+
+  @override
+  int get rowCount => products.length;
+
+  @override
+  int get selectedRowCount => 0;
 }

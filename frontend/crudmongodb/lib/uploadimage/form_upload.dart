@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:http/http.dart' as http;
+import '../constants.dart';
 
 class FormUpload extends StatefulWidget {
   @override
@@ -68,7 +69,7 @@ class _FormUploadState extends State<FormUpload> {
   }
 
   Future<http.Response> _uploadData(String name) async {
-    final uri = Uri.parse("http://192.168.70.64:5000/api/uploads/upload");
+    final uri = Uri.parse('$apiBaseUrl/api/uploads/upload');
     final request = http.MultipartRequest("POST", uri)..fields['name'] = name;
 
     if (kIsWeb) {

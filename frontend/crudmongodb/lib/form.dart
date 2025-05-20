@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'dart:io';
+import 'constants.dart';
 
 class UserForm extends StatefulWidget {
   final Map? user;
@@ -27,8 +28,8 @@ class _UserFormState extends State<UserForm> {
 
   Future<void> saveUser() async {
     final url = widget.user == null
-        ? 'http://192.168.70.64:5000/api/users'
-        : 'http://192.168.70.64:5000/api/users/${widget.user!['_id']}';
+        ? '$apiBaseUrl/api/users'
+        : '$apiBaseUrl/api/users/${widget.user!['_id']}';
 
     final method = widget.user == null ? http.post : http.put;
 

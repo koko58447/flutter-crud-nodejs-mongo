@@ -9,7 +9,7 @@
 // }
 
 // class _ShowUploadState extends State<ShowUpload> {
-//   final String apiUrl = "http://192.168.70.64:5000/api/uploads";
+//   final String apiUrl = '$apiBaseUrl/api/uploads";
 
 //   Future<List<dynamic>> fetchUploads() async {
 //     final response = await http.get(Uri.parse(apiUrl));
@@ -62,7 +62,7 @@
 //                 itemBuilder: (context, index) {
 //                   final upload = uploads[index];
 
-//                   final imageUrl = 'http://192.168.70.64:5000/${upload['path']}'
+//                   final imageUrl = '$apiBaseUrl/${upload['path']}'
 //                       .replaceAll(r'\', '/');
 
 //                   return GestureDetector(
@@ -141,6 +141,7 @@ import 'package:crudmongodb/uploadimage/form_upload.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import '../constants.dart';
 
 class ShowUpload extends StatefulWidget {
   @override
@@ -148,7 +149,7 @@ class ShowUpload extends StatefulWidget {
 }
 
 class _ShowUploadState extends State<ShowUpload> {
-  final String apiUrl = "http://192.168.70.64:5000/api/uploads";
+  final String apiUrl = '$apiBaseUrl/api/uploads';
   final searchController = TextEditingController();
   List uploads = [];
   List filteredUploads = [];
@@ -242,7 +243,7 @@ class _ShowUploadState extends State<ShowUpload> {
                     itemBuilder: (context, index) {
                       final upload = filteredUploads[index];
                       final imageUrl =
-                          'http://192.168.70.64:5000/${upload['path']}'
+                          '$apiBaseUrl/${upload['path']}'
                               .replaceAll(r'\', '/');
                       return GestureDetector(
                         onTap: () async {

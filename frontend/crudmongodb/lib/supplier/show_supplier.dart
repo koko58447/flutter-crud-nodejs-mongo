@@ -10,6 +10,8 @@ import 'dart:html' as html;
 import 'dart:typed_data';
 import 'package:excel/excel.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
+import '../constants.dart';
+import '../utils.dart';
 
 class Supplier extends StatefulWidget {
   const Supplier({Key? key}) : super(key: key);
@@ -30,7 +32,7 @@ class _SupplierState extends State<Supplier> {
     });
     try {
       final response =
-          await http.get(Uri.parse('http://192.168.70.64:5000/api/suppliers'));
+          await http.get(Uri.parse('$apiBaseUrl/api/suppliers'));
       if (response.statusCode == 200) {
         setState(() {
           suppliers = json.decode(response.body);
@@ -118,7 +120,7 @@ class _SupplierState extends State<Supplier> {
         // Example: API call to delete supplier from DB
         final response = await http.delete(
           Uri.parse(
-              'http://192.168.70.64:5000/api/suppliers/${supplier['_id']}'),
+              '$apiBaseUrl/api/suppliers/${supplier['_id']}'),
         );
 
         if (response.statusCode == 200) {
@@ -152,81 +154,8 @@ class _SupplierState extends State<Supplier> {
     super.dispose();
   }
 
-  void exportToExcel() {
-    try {
-      // Create a new Excel document
-      var excel = Excel.createExcel();
-
-      // Add a sheet and populate it with data
-      Sheet sheetObject = excel['Supplier'];
-      sheetObject.appendRow([
-        "Name",
-        "Email",
-        "Phone",
-        "Address",
-        "Gmail",
-        "FBacc"
-      ]); // Header row
-
-      for (var supplier in filteredSuppliers) {
-        sheetObject.appendRow([
-          supplier['name'],
-          supplier['email'],
-          supplier['phone'],
-          supplier['address'],
-          supplier['gmail'],
-          supplier['fbacc']
-        ]);
-      }
-
-      final excelBytes = excel.encode();
-      final blob = html.Blob([excelBytes]);
-      final url = html.Url.createObjectUrlFromBlob(blob);
-      final anchor = html.AnchorElement(href: url)
-        ..target = 'blank'
-        ..download = 'suppliers.xlsx'
-        ..click();
-      html.Url.revokeObjectUrl(url);
-
-      print("Excel file exported successfully.");
-    } catch (e) {
-      print("Error exporting Excel: $e");
-    }
-  }
-
-  void exportToCSV() {
-    try {
-      // Define the headers for the CSV file
-      List<List<dynamic>> rows = [
-        ["Name", "Email", "Phone", "Address", "Gmail", "FBAcc"] // Header row
-      ];
-
-      for (var supplier in filteredSuppliers) {
-        rows.add([
-          supplier['name'],
-          supplier['email'],
-          supplier['phone'],
-          supplier['address'],
-          supplier['gmail'],
-          supplier['fbacc']
-        ]);
-      }
-
-      String csvData = const ListToCsvConverter().convert(rows);
-      final bytes = html.Blob([csvData]);
-      final url = html.Url.createObjectUrlFromBlob(bytes);
-      final anchor = html.AnchorElement(href: url)
-        ..target = 'blank'
-        ..download = 'suppliers.csv'
-        ..click();
-      html.Url.revokeObjectUrl(url);
-
-      print("CSV file exported successfully.");
-    } catch (e) {
-      print("Error exporting CSV: $e");
-    }
-  }
-
+ 
+  
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
@@ -277,13 +206,24 @@ class _SupplierState extends State<Supplier> {
             child: const Icon(Icons.file_download),
             label: 'Export CSV',
             backgroundColor: Colors.green,
-            onTap: exportToCSV, // Call the exportToCSV function
+  onTap: () => exportListToCSV(
+    data: filteredSuppliers,
+    headers: ["Name", "Email", "Phone", "Address", "Gmail", "FBacc"],
+    fields: ['name', 'email', 'phone', 'address', 'gmail', 'fbacc'],
+    fileName: 'suppliers.csv',
+  ), // Call the exportToCSV function
           ),
           SpeedDialChild(
             child: const Icon(Icons.table_chart),
             label: 'Export Excel',
             backgroundColor: Colors.orange,
-            onTap: exportToExcel, // Call the exportToExcel function
+            onTap: () => exportListToExcel(
+  data: filteredSuppliers,
+  sheetName: 'Supplier',
+  headers: ["Name", "Email", "Phone", "Address", "Gmail", "FBacc"],
+  fields: ['name', 'email', 'phone', 'address', 'gmail', 'fbacc'],
+  fileName: 'suppliers.xlsx',
+), // Call the exportToExcel function
           ),
           SpeedDialChild(
             child: const Icon(Icons.add),

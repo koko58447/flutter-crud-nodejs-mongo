@@ -24,7 +24,7 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'Flutter CRUD',
       theme: ThemeData(primarySwatch: Colors.blue),
-      home: ShowProduct(),
+      home: ResponsiveLayout(),
     );
   }
 }
@@ -121,6 +121,26 @@ class _ResponsiveLayoutState extends State<ResponsiveLayout> {
               setState(() {
                 _selectedItem = 'Upload Image'; // Update selected item
                 _currentContent = ShowUpload(); // Update content to Home widget
+              });
+              if (MediaQuery.of(context).size.width < 1200) {
+                Navigator.pop(context); // Close the drawer
+              }
+            },
+          ),
+          ListTile(
+            leading: Icon(Icons.production_quantity_limits),
+            title: Text(
+              'Product',
+              style: TextStyle(
+                color: _selectedItem == 'Product'
+                    ? Colors.blue
+                    : Colors.black,
+              ),
+            ),
+            onTap: () {
+              setState(() {
+                _selectedItem = 'Product'; // Update selected item
+                _currentContent = ShowProduct(); // Update content to Home widget
               });
               if (MediaQuery.of(context).size.width < 1200) {
                 Navigator.pop(context); // Close the drawer
