@@ -6,6 +6,7 @@ const supplierRoutes = require('./routes/supplierRoutes');
 const uploadRoutes = require('./routes/uploadRoutes');
 const path = require('path');
 const productRoutes = require('./routes/productRoutes');
+const categoryRoutes = require('./routes/categoryRoutes');
 
 
 const app = express();
@@ -13,7 +14,7 @@ app.use(cors());
 app.use(express.json());
 
 
-// uploads ဖိုဒါကို static အဖြစ် serve လုပ်ပေးတာ
+// uploads ဖိုဒါကို static အဖြစ် serve လုပ်ပေးတာ // image ပြရန်
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // MongoDB Connection
@@ -28,6 +29,9 @@ app.use('/api/users', userRoutes);
 app.use('/api/suppliers', supplierRoutes);
 app.use('/api/uploads', uploadRoutes);
 app.use('/api/products', productRoutes);
+app.use('/api/categorys', categoryRoutes);
+
+//port and ip config
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {

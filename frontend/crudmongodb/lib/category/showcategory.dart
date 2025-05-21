@@ -1,28 +1,30 @@
+import 'package:crudmongodb/category/formcategory.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'form.dart';
+import '../utils.dart';
+import '../constants.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
-import 'constants.dart';
-import 'utils.dart';
+import 'package:http/http.dart' as http;
 
-class Home extends StatefulWidget {
+class ShowCategory extends StatefulWidget {
+  const ShowCategory({Key? key}) : super(key: key);
+
   @override
-  _HomeState createState() => _HomeState();
+  State<ShowCategory> createState() => _ShowCategoryState();
 }
 
-class _HomeState extends State<Home> {
-  List users = [];
-  List filteredUsers = [];
+class _ShowCategoryState extends State<ShowCategory> {
+  List categorys = [];
+  List filterCategory = [];
+  bool isLoading = true;
   final searchController = TextEditingController();
-  bool isLoading = false;
 
   Future<void> fetchAllData() async {
     await fetchData(
-      apiPath: '$apiBaseUrl/api/users',
+      apiPath: '$apiBaseUrl/api/categorys',
       onSuccess: (data) {
         setState(() {
-          users = data;
-          filteredUsers = users;
+          categorys = data;
+          filterCategory = categorys;
         });
       },
       onError: (message) {
@@ -44,17 +46,15 @@ class _HomeState extends State<Home> {
   void filterSearch(String query) {
     if (query.isEmpty) {
       setState(() {
-        filteredUsers = users;
+        filterCategory = categorys;
       });
       return;
     }
 
     setState(() {
-      filteredUsers = users.where((user) {
+      filterCategory = categorys.where((user) {
         String name = user['name'].toLowerCase();
-        String email = user['email'].toLowerCase();
-        return name.contains(query.toLowerCase()) ||
-            email.contains(query.toLowerCase());
+        return name.contains(query.toLowerCase());
       }).toList();
     });
   }
@@ -79,7 +79,7 @@ class _HomeState extends State<Home> {
     final screenWidth = MediaQuery.of(context).size.width;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('User Management')),
+      appBar: AppBar(title: const Text('Category Management')),
       body: Column(
         children: [
           Padding(
@@ -87,7 +87,7 @@ class _HomeState extends State<Home> {
             child: TextField(
               controller: searchController,
               decoration: InputDecoration(
-                hintText: "Search by name or email",
+                hintText: "Search by name",
                 prefixIcon: const Icon(Icons.search),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
@@ -98,19 +98,19 @@ class _HomeState extends State<Home> {
           Expanded(
             child: isLoading
                 ? const Center(child: CircularProgressIndicator())
-                : filteredUsers.isEmpty
+                : filterCategory.isEmpty
                     ? const Center(child: Text("No users found."))
                     : screenWidth < 600
                         ? MobileView(
                             filteredSuppliers:
-                                filteredUsers.cast<Map<String, dynamic>>(),
+                                filterCategory.cast<Map<String, dynamic>>(),
                             onEdit: (Map<dynamic, dynamic> user) => handleEdit(
                               context: context,
                               list: user,
                               fetchAllData:
                                   fetchAllData, // Replace with your fetch function
-                              listFormBuilder: (user) =>
-                                  UserForm(user: user), // Pass UserForm here
+                              listFormBuilder: (user) => CategoryForm(
+                                  user: user), // Pass UserForm here
                             ),
                             onDelete: (Map<dynamic, dynamic> user) =>
                                 handleDelete(
@@ -118,33 +118,32 @@ class _HomeState extends State<Home> {
                               list: user,
                               deleteCallback: (id) async {
                                 final response = await http.delete(
-                                    Uri.parse('$apiBaseUrl/api/users/$id'));
+                                    Uri.parse('$apiBaseUrl/api/categorys/$id'));
                                 if (response.statusCode != 200) {
                                   throw Exception("Failed to delete user");
                                 }
                               },
                               updateState: (user) {
                                 setState(() {
-                                  users.remove(user);
-                                  filteredUsers = users;
+                                  categorys.remove(user);
+                                  filterCategory = categorys;
                                 });
                               },
                             ),
                             columns: [
                               {'label': 'Name', 'key': 'name'},
-                              {'label': 'Email', 'key': 'email'},
                             ],
                           )
                         : TableView(
                             filteredSuppliers:
-                                filteredUsers.cast<Map<String, dynamic>>(),
+                                filterCategory.cast<Map<String, dynamic>>(),
                             onEdit: (Map<dynamic, dynamic> user) => handleEdit(
                               context: context,
                               list: user,
                               fetchAllData:
                                   fetchAllData, // Replace with your fetch function
-                              listFormBuilder: (user) =>
-                                  UserForm(user: user), // Pass UserForm here
+                              listFormBuilder: (user) => CategoryForm(
+                                  user: user), // Pass UserForm here
                             ),
                             onDelete: (Map<dynamic, dynamic> user) =>
                                 handleDelete(
@@ -152,23 +151,22 @@ class _HomeState extends State<Home> {
                               list: user,
                               deleteCallback: (id) async {
                                 final response = await http.delete(
-                                    Uri.parse('$apiBaseUrl/api/users/$id'));
+                                    Uri.parse('$apiBaseUrl/api/categorys/$id'));
                                 if (response.statusCode != 200) {
                                   throw Exception("Failed to delete user");
                                 }
                               },
                               updateState: (user) {
                                 setState(() {
-                                  users.remove(user);
-                                  filteredUsers = users;
+                                  categorys.remove(user);
+                                  filterCategory = categorys;
                                 });
                               },
                             ),
                             columns: [
                               {'label': 'Name', 'key': 'name'},
-                              {'label': 'Email', 'key': 'email'},
                             ],
-                            title: 'User Lists',
+                            title: 'Category Lists',
                           ),
           ),
         ],
@@ -184,10 +182,10 @@ class _HomeState extends State<Home> {
             label: 'Export CSV',
             backgroundColor: Colors.green,
             onTap: () => exportListToCSV(
-              data: filteredUsers,
-              headers: ["Name", "Email"],
-              fields: ['name', 'email'],
-              fileName: 'users.csv',
+              data: filterCategory,
+              headers: ["Name"],
+              fields: ['name'],
+              fileName: 'category.csv',
             ), // Call the exportToCSV function
           ),
           SpeedDialChild(
@@ -195,21 +193,23 @@ class _HomeState extends State<Home> {
             label: 'Export Excel',
             backgroundColor: Colors.orange,
             onTap: () => exportListToExcel(
-              data: filteredUsers,
-              sheetName: 'Users',
-              headers: ["Name", "Email"],
-              fields: ['name', 'email'],
-              fileName: 'users.xlsx',
+              data: filterCategory,
+              sheetName: 'Categorys',
+              headers: [
+                "Name",
+              ],
+              fields: ['name'],
+              fileName: 'category.xlsx',
             ), // Call the exportToExcel function
           ),
           SpeedDialChild(
             child: const Icon(Icons.add),
-            label: 'Add User',
+            label: 'Add Category',
             backgroundColor: Colors.blue,
             onTap: () async {
               await navigateAndRefresh(
                 context: context,
-                formBuilder: () => const UserForm(), // Pass the form widget
+                formBuilder: () => const CategoryForm(), // Pass the form widget
                 fetchAllData: fetchAllData, // Pass the data refresh function
               );
             },

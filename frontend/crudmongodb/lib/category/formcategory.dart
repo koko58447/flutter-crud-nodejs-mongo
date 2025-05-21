@@ -1,41 +1,35 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'constants.dart';
 
-class UserForm extends StatefulWidget {
+import '../constants.dart';
+
+class CategoryForm extends StatefulWidget {
   final Map? user;
-
-  const UserForm({this.user});
+  const CategoryForm({this.user});
 
   @override
-  _UserFormState createState() => _UserFormState();
+  State<CategoryForm> createState() => _CategoryFormState();
 }
 
-class _UserFormState extends State<UserForm> {
+class _CategoryFormState extends State<CategoryForm> {
   late TextEditingController nameController;
-  late TextEditingController emailController;
-  late TextEditingController passwordController;
 
   @override
   void initState() {
     super.initState();
     nameController = TextEditingController(text: widget.user?['name']);
-    emailController = TextEditingController(text: widget.user?['email']);
-    passwordController = TextEditingController(text: widget.user?['password']);
   }
 
   Future<void> saveUser() async {
     final url = widget.user == null
-        ? '$apiBaseUrl/api/users'
-        : '$apiBaseUrl/api/users/${widget.user!['_id']}';
+        ? '$apiBaseUrl/api/categorys'
+        : '$apiBaseUrl/api/categorys/${widget.user!['_id']}';
 
     final method = widget.user == null ? http.post : http.put;
 
     final body = {
       'name': nameController.text,
-      'email': emailController.text,
-      'password': passwordController.text,
     };
 
     final response = await method(
@@ -52,8 +46,8 @@ class _UserFormState extends State<UserForm> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar:
-          AppBar(title: Text(widget.user == null ? 'Add User' : 'Edit User')),
+      appBar: AppBar(
+          title: Text(widget.user == null ? 'Add Category' : 'Edit Category')),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -61,16 +55,6 @@ class _UserFormState extends State<UserForm> {
             TextField(
                 controller: nameController,
                 decoration: InputDecoration(labelText: 'Name')),
-            TextField(
-                controller: emailController,
-                decoration: InputDecoration(labelText: 'Email')),
-            TextField(
-              controller: passwordController,
-              decoration: InputDecoration(
-                labelText: 'Password',
-              ),
-              obscureText: true,
-            ),
             SizedBox(height: 20),
             ElevatedButton(onPressed: saveUser, child: Text('Save'))
           ],

@@ -1,3 +1,4 @@
+import 'package:crudmongodb/category/showcategory.dart';
 import 'package:crudmongodb/login.dart';
 import 'package:crudmongodb/product/form_product.dart';
 import 'package:crudmongodb/product/show_product.dart';
@@ -132,15 +133,33 @@ class _ResponsiveLayoutState extends State<ResponsiveLayout> {
             title: Text(
               'Product',
               style: TextStyle(
-                color: _selectedItem == 'Product'
-                    ? Colors.blue
-                    : Colors.black,
+                color: _selectedItem == 'Product' ? Colors.blue : Colors.black,
               ),
             ),
             onTap: () {
               setState(() {
                 _selectedItem = 'Product'; // Update selected item
-                _currentContent = ShowProduct(); // Update content to Home widget
+                _currentContent =
+                    ShowProduct(); // Update content to Home widget
+              });
+              if (MediaQuery.of(context).size.width < 1200) {
+                Navigator.pop(context); // Close the drawer
+              }
+            },
+          ),
+          ListTile(
+            leading: Icon(Icons.category),
+            title: Text(
+              'Category',
+              style: TextStyle(
+                color: _selectedItem == 'Category' ? Colors.blue : Colors.black,
+              ),
+            ),
+            onTap: () {
+              setState(() {
+                _selectedItem = 'Category'; // Update selected item
+                _currentContent =
+                    ShowCategory(); // Update content to Home widget
               });
               if (MediaQuery.of(context).size.width < 1200) {
                 Navigator.pop(context); // Close the drawer

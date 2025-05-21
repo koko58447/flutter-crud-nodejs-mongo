@@ -1,14 +1,7 @@
-import 'dart:io';
-
 import 'package:crudmongodb/supplier/form_supplier.dart';
-import 'package:csv/csv.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:path_provider/path_provider.dart';
 import 'dart:convert';
-import 'dart:html' as html;
-import 'dart:typed_data';
-import 'package:excel/excel.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import '../constants.dart';
 import '../utils.dart';
@@ -31,8 +24,7 @@ class _SupplierState extends State<Supplier> {
       isLoading = true;
     });
     try {
-      final response =
-          await http.get(Uri.parse('$apiBaseUrl/api/suppliers'));
+      final response = await http.get(Uri.parse('$apiBaseUrl/api/suppliers'));
       if (response.statusCode == 200) {
         setState(() {
           suppliers = json.decode(response.body);
@@ -119,8 +111,7 @@ class _SupplierState extends State<Supplier> {
       try {
         // Example: API call to delete supplier from DB
         final response = await http.delete(
-          Uri.parse(
-              '$apiBaseUrl/api/suppliers/${supplier['_id']}'),
+          Uri.parse('$apiBaseUrl/api/suppliers/${supplier['_id']}'),
         );
 
         if (response.statusCode == 200) {
@@ -154,8 +145,6 @@ class _SupplierState extends State<Supplier> {
     super.dispose();
   }
 
- 
-  
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
@@ -178,22 +167,38 @@ class _SupplierState extends State<Supplier> {
             ),
           ),
           Expanded(
-            child: isLoading
-                ? const Center(child: CircularProgressIndicator())
-                : filteredSuppliers.isEmpty
-                    ? const Center(child: Text("No supplier found."))
-                    : screenWidth < 600
-                        ? MobileView(
-                            filteredSuppliers: filteredSuppliers,
-                            onEdit: handleEdit,
-                            onDelete: handleDelete,
-                          )
-                        : TableView(
-                            filteredSuppliers: filteredSuppliers,
-                            onEdit: handleEdit,
-                            onDelete: handleDelete,
-                          ),
-          ),
+              child: isLoading
+                  ? const Center(child: CircularProgressIndicator())
+                  : filteredSuppliers.isEmpty
+                      ? const Center(child: Text("No supplier found."))
+                      : screenWidth < 600
+                          ? MobileView(
+                              filteredSuppliers: filteredSuppliers
+                                  .cast<Map<String, dynamic>>(),
+                              onEdit: handleEdit,
+                              onDelete: handleDelete,
+                              columns: [
+                                {'label': 'Name', 'key': 'name'},
+                                {'label': 'Email', 'key': 'email'},
+                                {'label': 'Phone', 'key': 'phone'},
+                                {'label': 'Address', 'key': 'address'},
+                              ],
+                            )
+                          : TableView(
+                              filteredSuppliers: filteredSuppliers
+                                  .cast<Map<String, dynamic>>(),
+                              onEdit: handleEdit,
+                              onDelete: handleDelete,
+                              columns: [
+                                {'label': 'Name', 'key': 'name'},
+                                {'label': 'Email', 'key': 'email'},
+                                {'label': 'Phone', 'key': 'phone'},
+                                {'label': 'Address', 'key': 'address'},
+                                {'label': 'Gmail', 'key': 'gmail'},
+                                {'label': 'FB Account', 'key': 'fbacc'},
+                              ],
+                              title: 'Supplier List',
+                            )),
         ],
       ),
       floatingActionButton: SpeedDial(
@@ -206,24 +211,24 @@ class _SupplierState extends State<Supplier> {
             child: const Icon(Icons.file_download),
             label: 'Export CSV',
             backgroundColor: Colors.green,
-  onTap: () => exportListToCSV(
-    data: filteredSuppliers,
-    headers: ["Name", "Email", "Phone", "Address", "Gmail", "FBacc"],
-    fields: ['name', 'email', 'phone', 'address', 'gmail', 'fbacc'],
-    fileName: 'suppliers.csv',
-  ), // Call the exportToCSV function
+            onTap: () => exportListToCSV(
+              data: filteredSuppliers,
+              headers: ["Name", "Email", "Phone", "Address", "Gmail", "FBacc"],
+              fields: ['name', 'email', 'phone', 'address', 'gmail', 'fbacc'],
+              fileName: 'suppliers.csv',
+            ), // Call the exportToCSV function
           ),
           SpeedDialChild(
             child: const Icon(Icons.table_chart),
             label: 'Export Excel',
             backgroundColor: Colors.orange,
             onTap: () => exportListToExcel(
-  data: filteredSuppliers,
-  sheetName: 'Supplier',
-  headers: ["Name", "Email", "Phone", "Address", "Gmail", "FBacc"],
-  fields: ['name', 'email', 'phone', 'address', 'gmail', 'fbacc'],
-  fileName: 'suppliers.xlsx',
-), // Call the exportToExcel function
+              data: filteredSuppliers,
+              sheetName: 'Supplier',
+              headers: ["Name", "Email", "Phone", "Address", "Gmail", "FBacc"],
+              fields: ['name', 'email', 'phone', 'address', 'gmail', 'fbacc'],
+              fileName: 'suppliers.xlsx',
+            ), // Call the exportToExcel function
           ),
           SpeedDialChild(
             child: const Icon(Icons.add),
@@ -241,145 +246,4 @@ class _SupplierState extends State<Supplier> {
       ),
     );
   }
-}
-
-class MobileView extends StatelessWidget {
-  final List filteredSuppliers;
-  final Function(Map) onEdit;
-  final Function(Map) onDelete;
-
-  const MobileView({
-    required this.filteredSuppliers,
-    required this.onEdit,
-    required this.onDelete,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return ListView.builder(
-      itemCount: filteredSuppliers.length,
-      itemBuilder: (context, index) {
-        var supplier = filteredSuppliers[index];
-        return ListTile(
-          leading: const Icon(Icons.person, size: 50),
-          title: Text(supplier['name']),
-          subtitle: Text(supplier['email']),
-          trailing: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              IconButton(
-                icon: const Icon(Icons.edit, color: Colors.blue),
-                onPressed: () => onEdit(supplier),
-              ),
-              IconButton(
-                icon: const Icon(Icons.delete, color: Colors.red),
-                onPressed: () => onDelete(supplier),
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
-}
-
-class TableView extends StatelessWidget {
-  final List filteredSuppliers;
-  final Function(Map) onEdit;
-  final Function(Map) onDelete;
-
-  const TableView({
-    required this.filteredSuppliers,
-    required this.onEdit,
-    required this.onDelete,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        return SingleChildScrollView(
-          child: Column(
-            children: [
-              ConstrainedBox(
-                constraints: BoxConstraints(
-                  minWidth: constraints.maxWidth,
-                ),
-                child: PaginatedDataTable(
-                  header: const Text("Supplier List"),
-                  columns: const [
-                    DataColumn(label: Text("Name")),
-                    DataColumn(label: Text("Email")),
-                    DataColumn(label: Text("Phone")),
-                    DataColumn(label: Text("Address")),
-                    DataColumn(label: Text("Gmail")),
-                    DataColumn(label: Text("FB Account")),
-                    DataColumn(label: Text("Actions")),
-                  ],
-                  source: _UserDataSource(
-                    filteredSuppliers: filteredSuppliers,
-                    onEdit: onEdit,
-                    onDelete: onDelete,
-                  ),
-                  rowsPerPage: 10, // Number of rows per page
-                  columnSpacing: 20,
-                  horizontalMargin: 10,
-                  showCheckboxColumn: false, // Hide checkbox column
-                ),
-              ),
-              const SizedBox(height: 60), // Add spacing below the table
-            ],
-          ),
-        );
-      },
-    );
-  }
-}
-
-class _UserDataSource extends DataTableSource {
-  final List filteredSuppliers;
-  final Function(Map) onEdit;
-  final Function(Map) onDelete;
-
-  _UserDataSource({
-    required this.filteredSuppliers,
-    required this.onEdit,
-    required this.onDelete,
-  });
-
-  @override
-  DataRow? getRow(int index) {
-    if (index >= filteredSuppliers.length) return null;
-
-    final supplier = filteredSuppliers[index];
-    return DataRow(cells: [
-      DataCell(Text(supplier['name'])),
-      DataCell(Text(supplier['email'])),
-      DataCell(Text(supplier['phone'] ?? 'N/A')),
-      DataCell(Text(supplier['address'] ?? 'N/A')),
-      DataCell(Text(supplier['gmail'] ?? 'N/A')),
-      DataCell(Text(supplier['fbacc'] ?? 'N/A')),
-      DataCell(Row(
-        children: [
-          IconButton(
-            icon: const Icon(Icons.edit, color: Colors.blue),
-            onPressed: () => onEdit(supplier),
-          ),
-          IconButton(
-            icon: const Icon(Icons.delete, color: Colors.red),
-            onPressed: () => onDelete(supplier),
-          ),
-        ],
-      )),
-    ]);
-  }
-
-  @override
-  bool get isRowCountApproximate => false;
-
-  @override
-  int get rowCount => filteredSuppliers.length;
-
-  @override
-  int get selectedRowCount => 0;
 }
