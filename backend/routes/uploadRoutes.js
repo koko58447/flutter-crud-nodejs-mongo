@@ -36,7 +36,7 @@ router.post('/upload', upload.single('image'), async (req, res) => {
 // Get all uploaded files
 router.get('/', async (req, res) => {
     try {
-        const uploads = await Upload.find();
+        const uploads = await Upload.find().sort({ _id: -1 });
         res.json(uploads);
     } catch (err) {
         res.status(500).json({ error: err.message });

@@ -25,7 +25,7 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'Flutter CRUD',
       theme: ThemeData(primarySwatch: Colors.blue),
-      home: ResponsiveLayout(),
+      home: Login(),
     );
   }
 }

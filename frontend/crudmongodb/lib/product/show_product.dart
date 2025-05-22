@@ -24,7 +24,7 @@ class _ShowProductState extends State<ShowProduct> {
 
   Future<void> fetchAllData() async {
     await fetchData(
-      apiPath: '$apiBaseUrl/api/products/productsupplier',
+      apiPath: '$apiBaseUrl/api/products/',
       onSuccess: (data) {
         // Process the data to include product and supplier name
         final List<Map<String, dynamic>> processedData = data.map((item) {
@@ -33,8 +33,10 @@ class _ShowProductState extends State<ShowProduct> {
             'name': item['name'],
             'price': item['price'],
             'qty': item['qty'],
-            'supplierid': item['supplierid'],
-            'suppliername': item['supplierDetails']?['name'] ?? 'Unknown',
+            'supplierid': item['supplierid']?['_id'] ?? 'Unknown',
+            'suppliername': item['supplierid']?['name'] ?? 'Unknown',
+            'categoryid': item['categoryid']?['_id'] ?? 'Unknown',
+            'categoryname': item['categoryid']?['name'] ?? 'Unknown',
           };
         }).toList();
         setState(() {
@@ -68,6 +70,9 @@ class _ShowProductState extends State<ShowProduct> {
         _filteredProducts = _products
             .where((product) =>
                 product['name'].toLowerCase().contains(query.toLowerCase()) ||
+                product['categoryname']
+                    .toLowerCase()
+                    .contains(query.toLowerCase()) ||
                 product['suppliername']
                     .toLowerCase()
                     .contains(query.toLowerCase()))
@@ -131,6 +136,7 @@ class _ShowProductState extends State<ShowProduct> {
                                 {'label': 'Price', 'key': 'price'},
                                 {'label': 'Quantity', 'key': 'qty'},
                                 {'label': 'Supplier', 'key': 'suppliername'},
+                                {'label': 'Category', 'key': 'categoryname'},
                               ],
                               onEdit: (Map<dynamic, dynamic> user) =>
                                   handleEdit(
@@ -169,6 +175,7 @@ class _ShowProductState extends State<ShowProduct> {
                                 {'label': 'Price', 'key': 'price'},
                                 {'label': 'Quantity', 'key': 'qty'},
                                 {'label': 'Supplier', 'key': 'suppliername'},
+                                {'label': 'Category', 'key': 'categoryname'},
                               ],
                               onEdit: (Map<dynamic, dynamic> user) =>
                                   handleEdit(
@@ -199,8 +206,8 @@ class _ShowProductState extends State<ShowProduct> {
             backgroundColor: Colors.green,
             onTap: () => exportListToCSV(
               data: _filteredProducts,
-              headers: ["Name", "Price", "Supplier", "Qty"],
-              fields: ['name', 'price', 'suppliername', 'qty'],
+              headers: ["Name", "Price", "Supplier", "Qty", "Category"],
+              fields: ['name', 'price', 'suppliername', 'qty', 'categoryname'],
               fileName: 'product.csv',
             ), // Call the exportToCSV function
           ),
@@ -211,8 +218,8 @@ class _ShowProductState extends State<ShowProduct> {
             onTap: () => exportListToExcel(
               data: _filteredProducts,
               sheetName: 'Product',
-              headers: ["Name", "Price", "Supplier", "Qty"],
-              fields: ['name', 'price', 'suppliername', 'qty'],
+              headers: ["Name", "Price", "Supplier", "Qty", "Category"],
+              fields: ['name', 'price', 'suppliername', 'qty', 'categoryname'],
               fileName: 'products.xlsx',
             ), // Call the exportToExcel function
           ),

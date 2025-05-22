@@ -1,3 +1,4 @@
+import 'package:crudmongodb/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -20,6 +21,9 @@ class _ProductFormState extends State<ProductForm> {
   String? _selectedSupplierId;
   List<Map<String, String>> _suppliers = [];
 
+  String? _selectedCategoryId;
+  List<Map<String, String>> _categorys = [];
+
   @override
   void initState() {
     super.initState();
@@ -32,36 +36,41 @@ class _ProductFormState extends State<ProductForm> {
       _nameController.text = widget.product!['name'] ?? '';
       _priceController.text = widget.product!['price']?.toString() ?? '';
       _selectedSupplierId = widget.product!['supplierid'];
+      _selectedCategoryId = widget.product!['categoryid'];
       _qtyController.text = widget.product!['qty']?.toString() ?? '';
     }
 
     // Fetch suppliers from MongoDB
     _fetchSuppliers();
+    _fetchCategorys();
   }
 
   Future<void> _fetchSuppliers() async {
-    try {
-      final response = await http.get(
-        Uri.parse('$apiBaseUrl/api/suppliers'),
-      );
-
-      if (response.statusCode == 200) {
-        final List<dynamic> data = json.decode(response.body);
+    await loadData(
+      apiBaseUrl: '$apiBaseUrl/api/suppliers',
+      updateSuppliers: (suppliers) {
         setState(() {
-          _suppliers = data
-              .map((supplier) => {
-                    'id': supplier['_id'].toString(),
-                    'name': supplier['name'].toString(),
-                  })
-              .toList();
+          _suppliers = suppliers;
         });
-      } else {
-        _showErrorDialog(
-            "Failed to fetch suppliers. Status code: ${response.statusCode}");
-      }
-    } catch (e) {
-      _showErrorDialog("An error occurred while fetching suppliers: $e");
-    }
+      },
+      showErrorDialog: (message) {
+        _showErrorDialog(message);
+      },
+    );
+  }
+
+  Future<void> _fetchCategorys() async {
+    await loadData(
+      apiBaseUrl: '$apiBaseUrl/api/categorys',
+      updateSuppliers: (suppliers) {
+        setState(() {
+          _suppliers = suppliers;
+        });
+      },
+      showErrorDialog: (message) {
+        _showErrorDialog(message);
+      },
+    );
   }
 
   @override
@@ -83,6 +92,7 @@ class _ProductFormState extends State<ProductForm> {
           'name': _nameController.text,
           'price': double.tryParse(_priceController.text) ?? 0.0,
           'supplierid': _selectedSupplierId ?? '',
+          'categoryid': _selectedCategoryId ?? '',
           'qty': int.tryParse(_qtyController.text) ?? 0,
         };
 
@@ -176,6 +186,27 @@ class _ProductFormState extends State<ProductForm> {
                   validator: (value) {
                     if (value == null || value.isEmpty) {
                       return 'Please select a supplier';
+                    }
+                    return null;
+                  },
+                ),
+                DropdownButtonFormField<String>(
+                  value: _selectedCategoryId,
+                  decoration: InputDecoration(labelText: 'Category'),
+                  items: _categorys.map((supplier) {
+                    return DropdownMenuItem(
+                      value: supplier['id'],
+                      child: Text(supplier['name']!),
+                    );
+                  }).toList(),
+                  onChanged: (value) {
+                    setState(() {
+                      _selectedCategoryId = value;
+                    });
+                  },
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please select a category';
                     }
                     return null;
                   },

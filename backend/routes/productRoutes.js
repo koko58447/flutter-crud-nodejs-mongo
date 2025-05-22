@@ -18,7 +18,7 @@ router.post('/', async (req, res) => {
 // Get all products
 router.get('/', async (req, res) => {
     try {
-        const products = await Product.find();
+        const products = await Product.find().populate('supplierid', 'name').populate('categoryid','name'); // Populate supplier name
         res.status(200).json(products);
     } catch (error) {
         res.status(500).json({ error: error.message });
@@ -40,6 +40,16 @@ router.get('/productsupplier', async (req, res) => {
         {
           $unwind: '$supplierDetails', // Flatten the supplierDetails array
         },
+       {
+            $project: {
+                _id: 1,
+                name: 1,
+                price: 1,
+                qty: 1,
+                suppliername: '$supplierDetails.name', // Include supplier name
+                supplieremail: '$supplierDetails.email', // Include supplier name
+            },
+       }
       ]);
       res.status(200).json(productsWithSuppliers);
     } catch (error) {

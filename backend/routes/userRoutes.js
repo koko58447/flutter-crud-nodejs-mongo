@@ -16,7 +16,7 @@ router.post('/', async (req, res) => {
 // Get All Users
 router.get('/', async (req, res) => {
     try {
-        const users = await User.find();
+        const users = await User.find().sort({ _id: -1 });
         res.json(users);
     } catch (err) {
         res.status(500).json({ message: err.message });

@@ -5,7 +5,7 @@ const Supplier = require('../models/Supplier');
 // Get all suppliers
 router.get('/', async (req, res) => {
     try {
-        const suppliers = await Supplier.find();
+        const suppliers = await Supplier.find().sort({ _id: -1 });
         res.json(suppliers);
     } catch (err) {
         res.status(500).json({ error: err.message });

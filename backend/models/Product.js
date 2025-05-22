@@ -8,6 +8,8 @@ const productSchema = new mongoose.Schema(
         qty: { type: Number, required: true },  // Use Number instead of Int
         supplierid: { type: mongoose.Schema.Types.ObjectId,
             ref: 'Supplier' },
+        categoryid: { type: mongoose.Schema.Types.ObjectId,
+            ref: 'Category' },
     },
     { timestamps: true }
 );

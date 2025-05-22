@@ -65,6 +65,7 @@ class MobileView extends StatelessWidget {
   });
 
   @override
+  @override
   Widget build(BuildContext context) {
     return ListView.builder(
       itemCount: filteredSuppliers.length,
@@ -72,8 +73,12 @@ class MobileView extends StatelessWidget {
         var supplier = filteredSuppliers[index];
         return Card(
           margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+          elevation: 4,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
           child: Padding(
-            padding: const EdgeInsets.all(8.0),
+            padding: const EdgeInsets.all(12.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -82,21 +87,44 @@ class MobileView extends StatelessWidget {
                   final label = column['label']!;
                   return Padding(
                     padding: const EdgeInsets.symmetric(vertical: 4.0),
-                    child: Text(
-                      '$label: ${supplier[key] ?? 'N/A'}',
-                      style: const TextStyle(fontSize: 16),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          label,
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.grey,
+                          ),
+                        ),
+                        Text(
+                          supplier[key]?.toString() ?? 'N/A',
+                          style: const TextStyle(fontSize: 16),
+                        ),
+                      ],
                     ),
                   );
                 }).toList(),
+                const Divider(thickness: 1, height: 20),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
-                    IconButton(
+                    TextButton.icon(
                       icon: const Icon(Icons.edit, color: Colors.blue),
+                      label: const Text(
+                        'Edit',
+                        style: TextStyle(color: Colors.blue),
+                      ),
                       onPressed: () => onEdit(supplier),
                     ),
-                    IconButton(
+                    const SizedBox(width: 8),
+                    TextButton.icon(
                       icon: const Icon(Icons.delete, color: Colors.red),
+                      label: const Text(
+                        'Delete',
+                        style: TextStyle(color: Colors.red),
+                      ),
                       onPressed: () => onDelete(supplier),
                     ),
                   ],
@@ -305,6 +333,38 @@ Future<void> navigateAndRefresh({
 
   if (result == true) {
     await fetchAllData(); // Refresh data if the form returns true
+  }
+}
+
+//load data with combo box
+Future<void> loadData({
+  required String apiBaseUrl,
+  required Function(List<Map<String, String>>)
+      updateSuppliers, // Callback to update suppliers
+  required Function(String) showErrorDialog, // Callback to show error dialog
+}) async {
+  try {
+    final response = await http.get(
+      Uri.parse(apiBaseUrl),
+    );
+
+    if (response.statusCode == 200) {
+      final List<dynamic> data = json.decode(response.body);
+      final suppliers = data
+          .map((supplier) => {
+                'id': supplier['_id'].toString(),
+                'name': supplier['name'].toString(),
+              })
+          .toList();
+
+      // Update suppliers using the callback
+      updateSuppliers(suppliers);
+    } else {
+      showErrorDialog(
+          "Failed to fetch suppliers. Status code: ${response.statusCode}");
+    }
+  } catch (e) {
+    showErrorDialog("An error occurred while fetching suppliers: $e");
   }
 }
 
