@@ -7,6 +7,8 @@ import 'package:http/http.dart' as http;
 import '../constants.dart';
 
 class FormUpload extends StatefulWidget {
+  const FormUpload({super.key});
+
   @override
   _FormUploadState createState() => _FormUploadState();
 }
@@ -92,12 +94,12 @@ class _FormUploadState extends State<FormUpload> {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: Text("Error"),
+        title: const Text("Error"),
         content: Text(message),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(),
-            child: Text("OK"),
+            child: const Text("OK"),
           ),
         ],
       ),
@@ -108,12 +110,12 @@ class _FormUploadState extends State<FormUpload> {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: Text("Success"),
+        title: const Text("Success"),
         content: Text(message),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(),
-            child: Text("OK"),
+            child: const Text("OK"),
           ),
         ],
       ),

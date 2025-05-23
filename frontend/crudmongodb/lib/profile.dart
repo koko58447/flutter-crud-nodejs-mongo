@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'login.dart';
 
 class ProfilePage extends StatelessWidget {
+  const ProfilePage({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -15,7 +17,7 @@ class ProfilePage extends StatelessWidget {
           children: [
             const SizedBox(height: 20),
             // Profile Picture
-            CircleAvatar(
+            const CircleAvatar(
               radius: 60,
               backgroundImage: AssetImage(
                   'assets/profile_picture.png'), // Replace with your image asset

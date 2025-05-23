@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
@@ -6,6 +7,8 @@ import 'main.dart';
 import 'constants.dart';
 
 class Login extends StatefulWidget {
+  const Login({super.key});
+
   @override
   _LoginState createState() => _LoginState();
 }
@@ -101,7 +104,7 @@ class _LoginState extends State<Login> {
                 height: containerHeight,
                 padding: const EdgeInsets.all(16.0),
                 decoration: BoxDecoration(
-                  gradient: LinearGradient(
+                  gradient: const LinearGradient(
                     colors: [Colors.blueAccent, Colors.lightBlue],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
@@ -115,90 +118,152 @@ class _LoginState extends State<Login> {
                     ),
                   ],
                 ),
-                child: Form(
-                  key: _formKey,
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Text(
-                        'Login',
-                        style: TextStyle(
-                          fontSize: 28,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                        ),
-                      ),
-                      const SizedBox(height: 24.0),
-                      TextFormField(
-                        controller: _emailController,
-                        decoration: InputDecoration(
-                          labelText: 'Email',
-                          labelStyle: const TextStyle(color: Colors.white),
-
-                          filled: true,
-                          // fillColor: Colors.white.withOpacity(0.8),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(8.0),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(24.0),
+                  child: BackdropFilter(
+                    filter: ImageFilter.blur(sigmaX: 16, sigmaY: 16),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.12),
+                        borderRadius: BorderRadius.circular(24.0),
+                        border: Border.all(
+                            color: Colors.white.withOpacity(0.2), width: 1.5),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.08),
+                            blurRadius: 24,
+                            offset: const Offset(0, 8),
                           ),
-                        ),
-                        keyboardType: TextInputType.emailAddress,
+                        ],
                       ),
-                      const SizedBox(height: 16.0),
-                      TextFormField(
-                        controller: _passwordController,
-                        decoration: InputDecoration(
-                          labelText: 'Password',
-                          labelStyle: const TextStyle(color: Colors.white),
-                          filled: true,
-                          // fillColor: Colors.white.withOpacity(0.8),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(8.0),
-                          ),
-                        ),
-                        obscureText: true,
-                      ),
-                      const SizedBox(height: 24.0),
-                      _isLoading
-                          ? const CircularProgressIndicator()
-                          : ElevatedButton(
-                              onPressed: () {
-                                if (_formKey.currentState!.validate()) {
-                                  setState(() {
-                                    _isLoading = true;
-                                  });
-
-                                  // Simulate a login process
-                                  Future.delayed(const Duration(seconds: 1),
-                                      () {
-                                    setState(() {
-                                      _isLoading = false;
-                                    });
-
-                                    _login();
-
-                                    // Navigate to Dashboard
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(
-                                          content: Text('Login Successful')),
-                                    );
-                                  });
-                                }
-                              },
-                              style: ElevatedButton.styleFrom(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 32.0, vertical: 16.0),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(8.0),
-                                ),
-                                // primary: Colors.blueAccent,
-                                // onSurface: Colors.blueAccent,
-                              ),
-                              child: const Text(
-                                'Login',
-                                style: TextStyle(fontSize: 16.0),
+                      padding: const EdgeInsets.all(32.0),
+                      child: Form(
+                        key: _formKey,
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            ShaderMask(
+                              shaderCallback: (bounds) => const LinearGradient(
+                                colors: [Colors.cyanAccent, Colors.blueAccent],
+                              ).createShader(bounds),
+                              child: const Icon(Icons.lock_outline,
+                                  size: 56, color: Colors.white),
+                            ),
+                            const SizedBox(height: 16.0),
+                            const Text(
+                              'Welcome Back!',
+                              style: TextStyle(
+                                fontSize: 28,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                                letterSpacing: 1.2,
                               ),
                             ),
-                    ],
+                            const SizedBox(height: 8.0),
+                            Text(
+                              'Sign in to continue',
+                              style: TextStyle(
+                                fontSize: 16,
+                                color: Colors.white.withOpacity(0.85),
+                              ),
+                            ),
+                            const SizedBox(height: 32.0),
+                            TextFormField(
+                              controller: _emailController,
+                              style: const TextStyle(color: Colors.white),
+                              decoration: InputDecoration(
+                                prefixIcon: const Icon(Icons.email_outlined,
+                                    color: Colors.white70),
+                                labelText: 'Email',
+                                labelStyle:
+                                    const TextStyle(color: Colors.white70),
+                                filled: true,
+                                fillColor: Colors.white.withOpacity(0.08),
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12.0),
+                                  borderSide: BorderSide.none,
+                                ),
+                              ),
+                              keyboardType: TextInputType.emailAddress,
+                            ),
+                            const SizedBox(height: 20.0),
+                            TextFormField(
+                              controller: _passwordController,
+                              style: const TextStyle(color: Colors.white),
+                              decoration: InputDecoration(
+                                prefixIcon: const Icon(Icons.lock_outline,
+                                    color: Colors.white70),
+                                labelText: 'Password',
+                                labelStyle:
+                                    const TextStyle(color: Colors.white70),
+                                filled: true,
+                                fillColor: Colors.white.withOpacity(0.08),
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12.0),
+                                  borderSide: BorderSide.none,
+                                ),
+                              ),
+                              obscureText: true,
+                            ),
+                            const SizedBox(height: 32.0),
+                            _isLoading
+                                ? const CircularProgressIndicator()
+                                : SizedBox(
+                                    width: double.infinity,
+                                    child: ElevatedButton(
+                                      onPressed: () {
+                                        if (_formKey.currentState!.validate()) {
+                                          setState(() {
+                                            _isLoading = true;
+                                          });
+                                          Future.delayed(
+                                              const Duration(milliseconds: 800),
+                                              () {
+                                            setState(() {
+                                              _isLoading = false;
+                                            });
+                                            _login();
+                                            ScaffoldMessenger.of(context)
+                                                .showSnackBar(const SnackBar(
+                                                    content: Text(
+                                                        'Login Successful')));
+                                          });
+                                        }
+                                      },
+                                      style: ElevatedButton.styleFrom(
+                                        padding: const EdgeInsets.symmetric(
+                                            vertical: 16.0),
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(12.0),
+                                        ),
+                                        elevation: 6,
+                                        backgroundColor:
+                                            const LinearGradient(
+                                          colors: [
+                                            Color(0xFF44F9FF),
+                                            Color(0xFF1E90FF)
+                                          ],
+                                        ).createShader(const Rect.fromLTWH(
+                                                0.0, 0.0, 200.0, 70.0)) !=
+                                                null
+                                            ? null
+                                            : const Color(0xFF44F9FF),
+                                        foregroundColor: Colors.white,
+                                        textStyle: const TextStyle(
+                                          fontSize: 18.0,
+                                          fontWeight: FontWeight.bold,
+                                          letterSpacing: 1.1,
+                                        ),
+                                      ),
+                                      child: const Text('Login'),
+                                    ),
+                                  ),
+                          ],
+                        ),
+                      ),
+                    ),
                   ),
                 ),
               ),

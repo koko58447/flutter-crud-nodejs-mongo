@@ -130,7 +130,7 @@ class _ShowCategoryState extends State<ShowCategory> {
                                 });
                               },
                             ),
-                            columns: [
+                            columns: const [
                               {'label': 'Name', 'key': 'name'},
                             ],
                           )
@@ -163,7 +163,7 @@ class _ShowCategoryState extends State<ShowCategory> {
                                 });
                               },
                             ),
-                            columns: [
+                            columns: const [
                               {'label': 'Name', 'key': 'name'},
                             ],
                             title: 'Category Lists',

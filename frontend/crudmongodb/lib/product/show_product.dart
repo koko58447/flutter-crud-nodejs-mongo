@@ -7,6 +7,8 @@ import 'form_product.dart';
 
 // Main ShowProduct Widget
 class ShowProduct extends StatefulWidget {
+  const ShowProduct({super.key});
+
   @override
   _ShowProductState createState() => _ShowProductState();
 }
@@ -131,7 +133,7 @@ class _ShowProductState extends State<ShowProduct> {
                                   });
                                 },
                               ),
-                              columns: [
+                              columns: const [
                                 {'label': 'Name', 'key': 'name'},
                                 {'label': 'Price', 'key': 'price'},
                                 {'label': 'Quantity', 'key': 'qty'},
@@ -170,7 +172,7 @@ class _ShowProductState extends State<ShowProduct> {
                                   });
                                 },
                               ),
-                              columns: [
+                              columns: const [
                                 {'label': 'Name', 'key': 'name'},
                                 {'label': 'Price', 'key': 'price'},
                                 {'label': 'Quantity', 'key': 'qty'},

@@ -144,6 +144,8 @@ import 'dart:convert';
 import '../constants.dart';
 
 class ShowUpload extends StatefulWidget {
+  const ShowUpload({super.key});
+
   @override
   _ShowUploadState createState() => _ShowUploadState();
 }
@@ -210,7 +212,7 @@ class _ShowUploadState extends State<ShowUpload> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Uploaded Files'),
+        title: const Text('Uploaded Files'),
       ),
       body: Column(
         children: [
@@ -272,14 +274,14 @@ class _ShowUploadState extends State<ShowUpload> {
                                   imageUrl,
                                   fit: BoxFit.cover,
                                   errorBuilder: (context, error, stackTrace) =>
-                                      Icon(Icons.broken_image),
+                                      const Icon(Icons.broken_image),
                                 ),
                               ),
                               Padding(
                                 padding: const EdgeInsets.all(8.0),
                                 child: Text(
                                   upload['name'] ?? 'Unknown Name',
-                                  style: TextStyle(fontWeight: FontWeight.bold),
+                                  style: const TextStyle(fontWeight: FontWeight.bold),
                                   overflow: TextOverflow.ellipsis,
                                 ),
                               ),
@@ -309,9 +311,9 @@ class _ShowUploadState extends State<ShowUpload> {
             }); // Refresh the state to show new uploads
 
           }
-        },
-        child: Icon(Icons.add), // Add icon
-        backgroundColor: Colors.blue, // Optional: Change button color
+        }, // Add icon
+        backgroundColor: Colors.blue,
+        child: Icon(Icons.add), // Optional: Change button color
       ),
     );
   }
@@ -323,23 +325,23 @@ class FullScreenImage extends StatelessWidget {
   final String deleteApiUrl; // API URL for deleting the image
 
   const FullScreenImage(
-      {required this.id, required this.imageUrl, required this.deleteApiUrl});
+      {super.key, required this.id, required this.imageUrl, required this.deleteApiUrl});
 
   Future<void> deleteImage(BuildContext context, id) async {
-    print(deleteApiUrl + '/$id');
+    print('$deleteApiUrl/$id');
     try {
-      final response = await http.delete(Uri.parse(deleteApiUrl + '/$id'));
+      final response = await http.delete(Uri.parse('$deleteApiUrl/$id'));
       if (response.statusCode == 200) {
         // Show success message
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Image deleted successfully')),
+          const SnackBar(content: Text('Image deleted successfully')),
         );
         // Navigate back to the previous screen
         Navigator.pop(context, true); // Pass true to indicate deletion
       } else {
         // Show error message
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to delete image')),
+          const SnackBar(content: Text('Failed to delete image')),
         );
       }
     } catch (e) {
@@ -356,25 +358,25 @@ class FullScreenImage extends StatelessWidget {
       backgroundColor: Colors.black,
       appBar: AppBar(
         backgroundColor: Colors.black,
-        iconTheme: IconThemeData(color: Colors.white),
+        iconTheme: const IconThemeData(color: Colors.white),
         actions: [
           IconButton(
-            icon: Icon(Icons.delete),
+            icon: const Icon(Icons.delete),
             onPressed: () async {
               // Confirm deletion
               final confirm = await showDialog<bool>(
                 context: context,
                 builder: (context) => AlertDialog(
-                  title: Text('Delete Image'),
-                  content: Text('Are you sure you want to delete this image?'),
+                  title: const Text('Delete Image'),
+                  content: const Text('Are you sure you want to delete this image?'),
                   actions: [
                     TextButton(
                       onPressed: () => Navigator.pop(context, false),
-                      child: Text('Cancel'),
+                      child: const Text('Cancel'),
                     ),
                     TextButton(
                       onPressed: () => Navigator.pop(context, true),
-                      child: Text('Delete'),
+                      child: const Text('Delete'),
                     ),
                   ],
                 ),
@@ -393,7 +395,7 @@ class FullScreenImage extends StatelessWidget {
           child: Image.network(
             imageUrl,
             fit: BoxFit.contain,
-            errorBuilder: (context, error, stackTrace) => Icon(
+            errorBuilder: (context, error, stackTrace) => const Icon(
               Icons.broken_image,
               color: Colors.white,
             ),

@@ -7,7 +7,7 @@ import '../constants.dart';
 class ProductForm extends StatefulWidget {
   final Map? product;
 
-  ProductForm({this.product});
+  const ProductForm({super.key, this.product});
   @override
   _ProductFormState createState() => _ProductFormState();
 }
@@ -62,9 +62,9 @@ class _ProductFormState extends State<ProductForm> {
   Future<void> _fetchCategorys() async {
     await loadData(
       apiBaseUrl: '$apiBaseUrl/api/categorys',
-      updateSuppliers: (suppliers) {
+      updateSuppliers: (a) {
         setState(() {
-          _suppliers = suppliers;
+          _categorys = a;
         });
       },
       showErrorDialog: (message) {
@@ -92,7 +92,7 @@ class _ProductFormState extends State<ProductForm> {
           'name': _nameController.text,
           'price': double.tryParse(_priceController.text) ?? 0.0,
           'supplierid': _selectedSupplierId ?? '',
-          'categoryid': _selectedCategoryId ?? '',
+          'categoryid': _selectedCategoryId ?? 1,
           'qty': int.tryParse(_qtyController.text) ?? 0,
         };
 
@@ -147,7 +147,7 @@ class _ProductFormState extends State<ProductForm> {
               children: [
                 TextFormField(
                   controller: _nameController,
-                  decoration: InputDecoration(labelText: 'Product Name'),
+                  decoration: const InputDecoration(labelText: 'Product Name'),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
                       return 'Please enter the product name';
@@ -157,7 +157,7 @@ class _ProductFormState extends State<ProductForm> {
                 ),
                 TextFormField(
                   controller: _priceController,
-                  decoration: InputDecoration(labelText: 'Price'),
+                  decoration: const InputDecoration(labelText: 'Price'),
                   keyboardType: TextInputType.number,
                   validator: (value) {
                     if (value == null || value.isEmpty) {
@@ -171,7 +171,7 @@ class _ProductFormState extends State<ProductForm> {
                 ),
                 DropdownButtonFormField<String>(
                   value: _selectedSupplierId,
-                  decoration: InputDecoration(labelText: 'Supplier'),
+                  decoration: const InputDecoration(labelText: 'Supplier'),
                   items: _suppliers.map((supplier) {
                     return DropdownMenuItem(
                       value: supplier['id'],
@@ -192,7 +192,7 @@ class _ProductFormState extends State<ProductForm> {
                 ),
                 DropdownButtonFormField<String>(
                   value: _selectedCategoryId,
-                  decoration: InputDecoration(labelText: 'Category'),
+                  decoration: const InputDecoration(labelText: 'Category'),
                   items: _categorys.map((supplier) {
                     return DropdownMenuItem(
                       value: supplier['id'],
@@ -213,7 +213,7 @@ class _ProductFormState extends State<ProductForm> {
                 ),
                 TextFormField(
                   controller: _qtyController,
-                  decoration: InputDecoration(labelText: 'Qty'),
+                  decoration: const InputDecoration(labelText: 'Qty'),
                   keyboardType: TextInputType.number,
                   validator: (value) {
                     if (value == null || value.isEmpty) {
@@ -228,7 +228,7 @@ class _ProductFormState extends State<ProductForm> {
                 const SizedBox(height: 20),
                 ElevatedButton(
                   onPressed: _submitForm,
-                  child: Text('Submit'),
+                  child: const Text('Submit'),
                 ),
               ],
             ),

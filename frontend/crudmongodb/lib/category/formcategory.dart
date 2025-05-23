@@ -6,7 +6,7 @@ import '../constants.dart';
 
 class CategoryForm extends StatefulWidget {
   final Map? user;
-  const CategoryForm({this.user});
+  const CategoryForm({super.key, this.user});
 
   @override
   State<CategoryForm> createState() => _CategoryFormState();
@@ -54,9 +54,9 @@ class _CategoryFormState extends State<CategoryForm> {
           children: [
             TextField(
                 controller: nameController,
-                decoration: InputDecoration(labelText: 'Name')),
-            SizedBox(height: 20),
-            ElevatedButton(onPressed: saveUser, child: Text('Save'))
+                decoration: const InputDecoration(labelText: 'Name')),
+            const SizedBox(height: 20),
+            ElevatedButton(onPressed: saveUser, child: const Text('Save'))
           ],
         ),
       ),

@@ -57,7 +57,7 @@ class MobileView extends StatelessWidget {
   final Function(Map) onDelete;
   final List<Map<String, String>> columns; // List of column definitions
 
-  const MobileView({
+  const MobileView({super.key, 
     required this.filteredSuppliers,
     required this.onEdit,
     required this.onDelete,
@@ -145,7 +145,7 @@ class TableView extends StatelessWidget {
   final List<Map<String, String>> columns; // List of column definitions
   final String title;
 
-  const TableView({
+  const TableView({super.key, 
     required this.filteredSuppliers,
     required this.onEdit,
     required this.onDelete,
@@ -288,7 +288,7 @@ Future<void> handleDelete({
     context: context,
     builder: (context) => AlertDialog(
       title: const Text("Confirm Delete"),
-      content: Text("Are you sure you want to delete item?"),
+      content: const Text("Are you sure you want to delete item?"),
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context, false),

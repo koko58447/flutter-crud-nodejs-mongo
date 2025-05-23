@@ -7,7 +7,7 @@ import '../constants.dart';
 class SupplierForm extends StatefulWidget {
   final Map? supplier;
 
-  SupplierForm({this.supplier});
+  const SupplierForm({super.key, this.supplier});
   @override
   _SupplierFormState createState() => _SupplierFormState();
 }
@@ -118,32 +118,32 @@ class _SupplierFormState extends State<SupplierForm> {
               children: [
                 TextFormField(
                   controller: _nameController,
-                  decoration: InputDecoration(labelText: 'Name'),
+                  decoration: const InputDecoration(labelText: 'Name'),
                 ),
                 TextFormField(
                   controller: _emailController,
-                  decoration: InputDecoration(labelText: 'Email'),
+                  decoration: const InputDecoration(labelText: 'Email'),
                 ),
                 TextFormField(
                   controller: _addressController,
-                  decoration: InputDecoration(labelText: 'Address'),
+                  decoration: const InputDecoration(labelText: 'Address'),
                 ),
                 TextFormField(
                   controller: _phoneController,
-                  decoration: InputDecoration(labelText: 'Phone'),
+                  decoration: const InputDecoration(labelText: 'Phone'),
                 ),
                 TextFormField(
                   controller: _gmailController,
-                  decoration: InputDecoration(labelText: 'Gmail'),
+                  decoration: const InputDecoration(labelText: 'Gmail'),
                 ),
                 TextFormField(
                   controller: _fbaccController,
-                  decoration: InputDecoration(labelText: 'Facebook Account'),
+                  decoration: const InputDecoration(labelText: 'Facebook Account'),
                 ),
                 const SizedBox(height: 20),
                 ElevatedButton(
                   onPressed: _submitForm,
-                  child: Text('Submit'),
+                  child: const Text('Submit'),
                 ),
               ],
             ),

@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 
 class Dashboard extends StatelessWidget {
+  const Dashboard({super.key});
+
   int _getCrossAxisCount(BuildContext context) {
     double width = MediaQuery.of(context).size.width;
     if (width >= 1200) {
@@ -95,7 +97,7 @@ class Dashboard extends StatelessWidget {
                             ],
                           ),
                         ],
-                        titlesData: FlTitlesData(
+                        titlesData: const FlTitlesData(
                           leftTitles: AxisTitles(
                             sideTitles: SideTitles(showTitles: true),
                           ),
@@ -104,7 +106,7 @@ class Dashboard extends StatelessWidget {
                           ),
                         ),
                         borderData: FlBorderData(show: false),
-                        gridData: FlGridData(show: false),
+                        gridData: const FlGridData(show: false),
                       ),
                     ),
                   ),

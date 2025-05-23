@@ -31,6 +31,8 @@ class MyApp extends StatelessWidget {
 }
 
 class ResponsiveLayout extends StatefulWidget {
+  const ResponsiveLayout({super.key});
+
   @override
   _ResponsiveLayoutState createState() => _ResponsiveLayoutState();
 }
@@ -45,7 +47,7 @@ class _ResponsiveLayoutState extends State<ResponsiveLayout> {
       child: ListView(
         padding: EdgeInsets.zero,
         children: [
-          DrawerHeader(
+          const DrawerHeader(
             decoration: BoxDecoration(color: Colors.blue),
             child: Text(
               'Menu',
@@ -53,7 +55,7 @@ class _ResponsiveLayoutState extends State<ResponsiveLayout> {
             ),
           ),
           ListTile(
-            leading: Icon(Icons.dashboard),
+            leading: const Icon(Icons.dashboard),
             title: Text(
               'Dashboard',
               style: TextStyle(
@@ -72,7 +74,7 @@ class _ResponsiveLayoutState extends State<ResponsiveLayout> {
             },
           ),
           ListTile(
-            leading: Icon(Icons.person),
+            leading: const Icon(Icons.person),
             title: Text(
               'Users',
               style: TextStyle(
@@ -90,7 +92,7 @@ class _ResponsiveLayoutState extends State<ResponsiveLayout> {
             },
           ),
           ListTile(
-            leading: Icon(Icons.support_outlined),
+            leading: const Icon(Icons.support_outlined),
             title: Text(
               'Supplier',
               style: TextStyle(
@@ -101,7 +103,7 @@ class _ResponsiveLayoutState extends State<ResponsiveLayout> {
             onTap: () {
               setState(() {
                 _selectedItem = 'Suppliers'; // Update selected item
-                _currentContent = Supplier(); // Update content to Home widget
+                _currentContent = const Supplier(); // Update content to Home widget
               });
               if (MediaQuery.of(context).size.width < 1200) {
                 Navigator.pop(context); // Close the drawer
@@ -109,7 +111,7 @@ class _ResponsiveLayoutState extends State<ResponsiveLayout> {
             },
           ),
           ListTile(
-            leading: Icon(Icons.image_aspect_ratio),
+            leading: const Icon(Icons.image_aspect_ratio),
             title: Text(
               'Upload Image',
               style: TextStyle(
@@ -129,7 +131,7 @@ class _ResponsiveLayoutState extends State<ResponsiveLayout> {
             },
           ),
           ListTile(
-            leading: Icon(Icons.production_quantity_limits),
+            leading: const Icon(Icons.production_quantity_limits),
             title: Text(
               'Product',
               style: TextStyle(
@@ -148,7 +150,7 @@ class _ResponsiveLayoutState extends State<ResponsiveLayout> {
             },
           ),
           ListTile(
-            leading: Icon(Icons.category),
+            leading: const Icon(Icons.category),
             title: Text(
               'Category',
               style: TextStyle(
@@ -159,7 +161,7 @@ class _ResponsiveLayoutState extends State<ResponsiveLayout> {
               setState(() {
                 _selectedItem = 'Category'; // Update selected item
                 _currentContent =
-                    ShowCategory(); // Update content to Home widget
+                    const ShowCategory(); // Update content to Home widget
               });
               if (MediaQuery.of(context).size.width < 1200) {
                 Navigator.pop(context); // Close the drawer
@@ -192,10 +194,10 @@ class _ResponsiveLayoutState extends State<ResponsiveLayout> {
                                 SettingPage()), // Replace with your SettingPage
                       );
                     },
-                    child: Padding(
-                      padding: const EdgeInsets.all(8.0),
+                    child: const Padding(
+                      padding: EdgeInsets.all(8.0),
                       child: Row(
-                        children: const [
+                        children: [
                           Icon(Icons.settings),
                           SizedBox(width: 4),
                           Text('Settings'),
@@ -234,10 +236,10 @@ class _ResponsiveLayoutState extends State<ResponsiveLayout> {
                         ),
                       );
                     },
-                    child: Padding(
-                      padding: const EdgeInsets.all(8.0),
+                    child: const Padding(
+                      padding: EdgeInsets.all(8.0),
                       child: Row(
-                        children: const [
+                        children: [
                           Icon(Icons.logout),
                           SizedBox(width: 4),
                           Text('Logout'),
@@ -249,7 +251,7 @@ class _ResponsiveLayoutState extends State<ResponsiveLayout> {
               ),
               body: Row(
                 children: [
-                  Container(
+                  SizedBox(
                     width: 250, // Fixed width for the drawer
                     child: drawer,
                   ),

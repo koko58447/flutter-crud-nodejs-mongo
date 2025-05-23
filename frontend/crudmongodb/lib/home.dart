@@ -6,6 +6,8 @@ import 'constants.dart';
 import 'utils.dart';
 
 class Home extends StatefulWidget {
+  const Home({super.key});
+
   @override
   _HomeState createState() => _HomeState();
 }
@@ -130,7 +132,7 @@ class _HomeState extends State<Home> {
                                 });
                               },
                             ),
-                            columns: [
+                            columns: const [
                               {'label': 'Name', 'key': 'name'},
                               {'label': 'Email', 'key': 'email'},
                             ],
@@ -164,7 +166,7 @@ class _HomeState extends State<Home> {
                                 });
                               },
                             ),
-                            columns: [
+                            columns: const [
                               {'label': 'Name', 'key': 'name'},
                               {'label': 'Email', 'key': 'email'},
                             ],

@@ -177,7 +177,7 @@ class _SupplierState extends State<Supplier> {
                                   .cast<Map<String, dynamic>>(),
                               onEdit: handleEdit,
                               onDelete: handleDelete,
-                              columns: [
+                              columns: const [
                                 {'label': 'Name', 'key': 'name'},
                                 {'label': 'Email', 'key': 'email'},
                                 {'label': 'Phone', 'key': 'phone'},
@@ -189,7 +189,7 @@ class _SupplierState extends State<Supplier> {
                                   .cast<Map<String, dynamic>>(),
                               onEdit: handleEdit,
                               onDelete: handleDelete,
-                              columns: [
+                              columns: const [
                                 {'label': 'Name', 'key': 'name'},
                                 {'label': 'Email', 'key': 'email'},
                                 {'label': 'Phone', 'key': 'phone'},

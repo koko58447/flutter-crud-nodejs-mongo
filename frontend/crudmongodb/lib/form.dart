@@ -6,7 +6,7 @@ import 'constants.dart';
 class UserForm extends StatefulWidget {
   final Map? user;
 
-  const UserForm({this.user});
+  const UserForm({super.key, this.user});
 
   @override
   _UserFormState createState() => _UserFormState();
@@ -60,19 +60,19 @@ class _UserFormState extends State<UserForm> {
           children: [
             TextField(
                 controller: nameController,
-                decoration: InputDecoration(labelText: 'Name')),
+                decoration: const InputDecoration(labelText: 'Name')),
             TextField(
                 controller: emailController,
-                decoration: InputDecoration(labelText: 'Email')),
+                decoration: const InputDecoration(labelText: 'Email')),
             TextField(
               controller: passwordController,
-              decoration: InputDecoration(
+              decoration: const InputDecoration(
                 labelText: 'Password',
               ),
               obscureText: true,
             ),
-            SizedBox(height: 20),
-            ElevatedButton(onPressed: saveUser, child: Text('Save'))
+            const SizedBox(height: 20),
+            ElevatedButton(onPressed: saveUser, child: const Text('Save'))
           ],
         ),
       ),
