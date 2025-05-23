@@ -45,4 +45,22 @@ router.delete('/:id', async (req, res) => {
     }
 });
 
+router.get('/searchdate', async (req, res) => {
+    const { startDate, endDate } = req.query;
+    console.log('Start Date:', startDate, 'End Date:', endDate); // Debugging
+    const query = {};
+    if (startDate && endDate) {
+      query.createdAt = { $gte: new Date(startDate), $lte: new Date(endDate) };
+    }
+    try {
+      const suppliers = await Supplier.find(query);
+      res.json(suppliers);
+    } catch (error) {
+      console.error('Error:', error); // Log errors
+      res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
+
+
 module.exports = router;

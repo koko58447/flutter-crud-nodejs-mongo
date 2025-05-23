@@ -7,6 +7,7 @@ const uploadRoutes = require('./routes/uploadRoutes');
 const path = require('path');
 const productRoutes = require('./routes/productRoutes');
 const categoryRoutes = require('./routes/categoryRoutes');
+const videoRoutes = require('./routes/videoRoutes');
 
 
 const app = express();
@@ -30,6 +31,7 @@ app.use('/api/suppliers', supplierRoutes);
 app.use('/api/uploads', uploadRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/categorys', categoryRoutes);
+app.use('/api/videos', videoRoutes);
 
 //port and ip config
 
