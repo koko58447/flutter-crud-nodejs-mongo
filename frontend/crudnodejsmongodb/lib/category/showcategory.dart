@@ -181,24 +181,15 @@ class _ShowCategoryState extends State<ShowCategory> {
             child: const Icon(Icons.file_download),
             label: 'Export CSV',
             backgroundColor: Colors.green,
-            onTap: () => exportListToCSV(
-              data: filterCategory,
-              headers: ["Name"],
-              fields: ['name'],
-              fileName: 'category.csv',
-            ), // Call the exportToCSV function
+            onTap: () => createAndShareExcel(headers: ["Name"], rows: filterCategory.map((user) => [user['name']]).toList(),
+              fileName: 'categorys.csv'),
           ),
           SpeedDialChild(
             child: const Icon(Icons.table_chart),
             label: 'Export Excel',
             backgroundColor: Colors.orange,
-            onTap: () => exportListToExcel(
-              data: filterCategory,
-              sheetName: 'Categorys',
-              headers: ["Name"],
-              fields: ['name'],
-              fileName: 'category.xlsx',
-            ), // Call the exportToExcel function
+            onTap: () => createAndShareExcel(headers: ["Name"], rows: filterCategory.map((user) => [user['name']]).toList(),
+              fileName: 'categorys.xlsx'),
           ),
           SpeedDialChild(
             child: const Icon(Icons.add),

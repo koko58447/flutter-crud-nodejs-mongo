@@ -1,6 +1,7 @@
-import 'dart:html' as html;
-import 'dart:typed_data';
-import 'package:csv/csv.dart';
+
+import 'dart:io';
+
+import 'package:easy_localization/easy_localization.dart';
 import 'package:excel/excel.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -8,50 +9,100 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:excel/excel.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:share_plus/share_plus.dart';
 
-void exportListToExcel({
+Future<void> createAndShareExcel({
+  required List<String> headers,
+  required List<List<dynamic>> rows,
+  String fileName = 'export.xlsx',
+}) async {
+  // Excel ဖန်တီးပါ
+  final excel = Excel.createExcel();
+  final sheet = excel['Sheet1'];
+
+  // Headers ထည့်ပါ (A1, B1, C1 ...)
+  for (int i = 0; i < headers.length; i++) {
+    sheet
+        .cell(CellIndex.indexByColumnRow(columnIndex: i, rowIndex: 0))
+        .value = TextCellValue(headers[i]);
+  }
+
+  // Rows ထည့်ပါ (A2, B2, A3, B3 ...)
+  for (int rowIdx = 0; rowIdx < rows.length; rowIdx++) {
+    final rowData = rows[rowIdx];
+    for (int colIdx = 0; colIdx < rowData.length; colIdx++) {
+      sheet
+          .cell(CellIndex.indexByColumnRow(
+              columnIndex: colIdx, rowIndex: rowIdx + 1))
+          .value = TextCellValue(rowData[colIdx].toString());
+    }
+  }
+
+  // File Path ရယူပါ
+  final directory = await getApplicationDocumentsDirectory();
+  final filePath = '${directory.path}/$fileName';
+  final file = File(filePath)..writeAsBytesSync(excel.encode()!);
+
+  // Share ပြုလုပ်ပါ
+  await Share.shareXFiles(
+    [XFile(file.path)],
+    text: 'Please check the attached Excel file.',
+  );
+}
+
+Future<void> exportListToExcelWeb({
   required List data,
   required String sheetName,
   required List<String> headers,
   required List<String> fields,
   required String fileName,
-}) {
-  var excel = Excel.createExcel();
-  Sheet sheetObject = excel[sheetName];
-  sheetObject.appendRow(headers);
+}) async {
+  // var excel = Excel.createExcel();
+  // Sheet sheetObject = excel[sheetName];
+  // sheetObject.appendRow(headers);
 
-  for (var item in data) {
-    sheetObject.appendRow([for (var field in fields) item[field]]);
-  }
+  // for (var item in data) {
+  //   sheetObject.appendRow([for (var field in fields) item[field]]);
+  // }
 
-  final excelBytes = excel.encode();
-  final blob = html.Blob([excelBytes]);
-  final url = html.Url.createObjectUrlFromBlob(blob);
-  final anchor = html.AnchorElement(href: url)
-    ..target = 'blank'
-    ..download = fileName
-    ..click();
-  html.Url.revokeObjectUrl(url);
+  // final excelBytes = excel.encode();
+
+  // final blob = html.Blob([excelBytes]);
+  // final url = html.Url.createObjectUrlFromBlob(blob);
+  // final anchor = html.AnchorElement(href: url)
+  //   ..target = 'blank'
+  //   ..download = fileName
+  //   ..click();
+  // html.Url.revokeObjectUrl(url);
+
+  //   final Directory dir = await getApplicationDocumentsDirectory();
+  // final String path = '${dir.path}/$fileName';
+  // final File file = File(path)..writeAsBytesSync(excelBytes!);
+
+  // OpenFilex.open(path);
 }
 
-void exportListToCSV({
+void exportListToCSVweb({
   required List data,
   required List<String> headers,
   required List<String> fields,
   String fileName = 'export.csv',
 }) {
-  List<List<dynamic>> rows = [headers];
-  for (var item in data) {
-    rows.add([for (var field in fields) item[field]]);
-  }
-  String csvData = const ListToCsvConverter().convert(rows);
-  final bytes = html.Blob([csvData]);
-  final url = html.Url.createObjectUrlFromBlob(bytes);
-  final anchor = html.AnchorElement(href: url)
-    ..target = 'blank'
-    ..download = fileName
-    ..click();
-  html.Url.revokeObjectUrl(url);
+  // List<List<dynamic>> rows = [headers];
+  // for (var item in data) {
+  //   rows.add([for (var field in fields) item[field]]);
+  // }
+  // String csvData = const ListToCsvConverter().convert(rows);
+  // final bytes = html.Blob([csvData]);
+  // final url = html.Url.createObjectUrlFromBlob(bytes);
+  // final anchor = html.AnchorElement(href: url)
+  //   ..target = 'blank'
+  //   ..download = fileName
+  //   ..click();
+  // html.Url.revokeObjectUrl(url);
 }
 
 //mobile view and table view
@@ -467,6 +518,7 @@ Future<Map<String, dynamic>?> pickImageAndGetResult(
         fileName = pickedFile.name;
       } else {
         // Mobile အတွက် file path ကိုသာ သိမ်း
+         fileBytes = await pickedFile.readAsBytes();
         fileName = pickedFile.path.split('/').last;
       }
 
@@ -477,4 +529,43 @@ Future<Map<String, dynamic>?> pickImageAndGetResult(
   }
 
   return null; // ဘာမှမရွေးရင် null ပြန်ပါမယ်
+}
+
+//set language
+String getCurrentLanguageLabel(BuildContext context) {
+  final locale = Localizations.localeOf(context);
+  if (locale.languageCode == 'en') {
+    return 'English';
+  } else if (locale.languageCode == 'my') {
+    return 'မြန်မာ';
+  }
+  return 'Unknown';
+}
+
+void showLanguageDialog(BuildContext context) {
+  showDialog(
+    context: context,
+    builder: (context) => AlertDialog(
+      title: Text('language.select'.tr()), // သို့မဟုတ် သင့်ဘာသာပြန်ချက် key အတိုင်း
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          ListTile(
+            title: Text('language.english'.tr()),
+            onTap: () {
+              context.setLocale(const Locale('en'));
+              Navigator.pop(context);
+            },
+          ),
+          ListTile(
+            title: Text('language.myanmar'.tr()),
+            onTap: () {
+              context.setLocale(const Locale('my'));
+              Navigator.pop(context);
+            },
+          ),
+        ],
+      ),
+    ),
+  );
 }

@@ -36,7 +36,7 @@ class _ProductFormState extends State<ProductForm> {
       _nameController.text = widget.product!['name'] ?? '';
       _priceController.text = widget.product!['price']?.toString() ?? '';
       _selectedSupplierId = widget.product!['supplierid'];
-      _selectedCategoryId = widget.product!['categoryid'];
+      _selectedCategoryId = widget.product!['categoryid'] ?? 1;
       _qtyController.text = widget.product!['qty']?.toString() ?? '';
     }
 

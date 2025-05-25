@@ -1,0 +1,10 @@
+{
+  "title": "Title",
+  "button": "Change to Burmese",
+  "language": {
+    "title": "Language",
+    "select": "Select Language",
+    "english": "English",
+    "myanmar": "Myanmar"
+  }
+}

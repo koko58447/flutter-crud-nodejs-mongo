@@ -1,6 +1,7 @@
 import 'barcodescanner/barcodescanner.dart';
 import 'barcodescanner/invoicceprinter.dart';
 import 'category/showcategory.dart';
+import 'exportexcel.dart';
 import 'login.dart';
 import 'product/form_product.dart';
 import 'product/show_product.dart';
@@ -14,10 +15,22 @@ import 'dashboard.dart';
 import 'home.dart';
 import 'videos/showvideos.dart';
 
-void main() {
+import 'package:easy_localization/easy_localization.dart';
+import 'utils.dart';
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  runApp(const MyApp());
+  await EasyLocalization.ensureInitialized();
+ 
+  runApp(
+    EasyLocalization(
+      supportedLocales: [Locale('en'), Locale('my')],
+      path: 'assets/translations', // json files path
+      fallbackLocale: Locale('en'),
+      child: MyApp(),
+    ),
+  );
 }
+
 
 class MyApp extends StatelessWidget {
   const MyApp({Key? key}) : super(key: key);
@@ -25,10 +38,13 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      localizationsDelegates: context.localizationDelegates,
+      supportedLocales: context.supportedLocales,
+      locale: context.locale,
       debugShowCheckedModeBanner: false,
       title: 'Flutter CRUD Project',
       theme: ThemeData(primarySwatch: Colors.blue),
-      home: UploadScreen(),
+      home: ResponsiveLayout(),
     );
   }
 }
@@ -207,7 +223,26 @@ class _ResponsiveLayoutState extends State<ResponsiveLayout> {
               setState(() {
                 _selectedItem = 'Invoice'; // Update selected item
                 _currentContent =
-                    const Invoice(); // Update content to Home widget
+                    const InvoicePrinter(); // Update content to Home widget
+              });
+              if (MediaQuery.of(context).size.width < 1200) {
+                Navigator.pop(context); // Close the drawer
+              }
+            },
+          ),
+           ListTile(
+            leading: const Icon(Icons.print),
+            title: Text(
+              'Excel',
+              style: TextStyle(
+                color: _selectedItem == 'Excel' ? Colors.blue : Colors.black,
+              ),
+            ),
+            onTap: () {
+              setState(() {
+                _selectedItem = 'Excel'; // Update selected item
+                _currentContent =
+                    const Exportexcel(); // Update content to Home widget
               });
               if (MediaQuery.of(context).size.width < 1200) {
                 Navigator.pop(context); // Close the drawer
@@ -217,6 +252,9 @@ class _ResponsiveLayoutState extends State<ResponsiveLayout> {
         ],
       ),
     );
+
+
+    
 
     return WillPopScope(
       onWillPop: () async {
@@ -228,8 +266,27 @@ class _ResponsiveLayoutState extends State<ResponsiveLayout> {
             // Desktop layout with persistent drawer
             return Scaffold(
               appBar: AppBar(
-                title: const Text('Flutter CRUD'),
+                title: Text(tr('title')), // Use translation key
                 actions: [
+                  GestureDetector(
+                    onTap:(){
+                      showLanguageDialog(context);
+                    },
+                    child: Padding(
+                        padding: EdgeInsets.all(8.0),
+                        child: Row(
+                          children: [
+                            Icon(Icons.language),
+                            SizedBox(width: 4),
+                            Text('Language'),
+                            Text(
+                                '(' + getCurrentLanguageLabel(context) + ')',
+                                style: const TextStyle(fontSize: 12, color: Colors.grey),
+                              ),
+                          ],
+                        ),
+                      ),
+                  ),
                   GestureDetector(
                     onTap: () {
                       // Navigate to the Settings page
@@ -312,7 +369,7 @@ class _ResponsiveLayoutState extends State<ResponsiveLayout> {
             // Mobile/Tablet layout with sliding drawer
             return Scaffold(
               appBar: AppBar(
-                title: const Text('Flutter CRUD'),
+                title:  Text(tr('title')),
                 actions: [
                   PopupMenuButton<String>(
                     onSelected: (value) {
@@ -355,8 +412,25 @@ class _ResponsiveLayoutState extends State<ResponsiveLayout> {
                           ), // Navigate to SettingPage
                         );
                       }
+                      else if (value == 'Language') {
+      // Show language selection dialog
+                        showLanguageDialog(context);
+                      }
                     },
                     itemBuilder: (context) => [
+                      PopupMenuItem(
+                        value: 'Language',
+                        child: Row(
+        children: [
+          const Text("Language"), // "Language"
+          const SizedBox(width: 8),
+          Text(
+            '(' + getCurrentLanguageLabel(context) + ')',
+            style: const TextStyle(fontSize: 12, color: Colors.grey),
+          ),
+        ],
+      ),
+                      ),
                       const PopupMenuItem(
                         value: 'Setting',
                         child: Text('Setting'),
@@ -377,4 +451,5 @@ class _ResponsiveLayoutState extends State<ResponsiveLayout> {
       ),
     );
   }
+
 }

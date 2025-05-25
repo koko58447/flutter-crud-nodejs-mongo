@@ -185,24 +185,15 @@ class _HomeState extends State<Home> {
             child: const Icon(Icons.file_download),
             label: 'Export CSV',
             backgroundColor: Colors.green,
-            onTap: () => exportListToCSV(
-              data: filteredUsers,
-              headers: ["Name", "Email"],
-              fields: ['name', 'email'],
-              fileName: 'users.csv',
-            ), // Call the exportToCSV function
+            onTap: () => createAndShareExcel(headers: ["Name", "Email"], rows: filteredUsers.map((user) => [user['name'], user['email']]).toList(),
+              fileName: 'users.csv'),
           ),
           SpeedDialChild(
             child: const Icon(Icons.table_chart),
             label: 'Export Excel',
             backgroundColor: Colors.orange,
-            onTap: () => exportListToExcel(
-              data: filteredUsers,
-              sheetName: 'Users',
-              headers: ["Name", "Email"],
-              fields: ['name', 'email'],
-              fileName: 'users.xlsx',
-            ), // Call the exportToExcel function
+            onTap: () => createAndShareExcel(headers: ["Name", "Email"], rows: filteredUsers.map((user) => [user['name'], user['email']]).toList(),
+              fileName: 'users.xlsx'),
           ),
           SpeedDialChild(
             child: const Icon(Icons.add),

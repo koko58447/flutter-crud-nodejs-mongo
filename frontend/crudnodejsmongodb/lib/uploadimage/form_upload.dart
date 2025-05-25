@@ -70,7 +70,7 @@ class _FormUploadState extends State<FormUpload> {
       );
     } else {
       // For mobile, use file path
-      request.files.add(await http.MultipartFile.fromPath('image', _filePath!));
+      request.files.add(await http.MultipartFile.fromBytes('image', _fileBytes!, filename: _filePath));
     }
 
     final streamedResponse = await request.send();

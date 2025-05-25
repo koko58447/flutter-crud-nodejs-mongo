@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -16,6 +18,15 @@ class UploadScreen extends StatefulWidget {
 class _UploadScreenState extends State<UploadScreen> {
   XFile? _video;
   String? _videoPath;
+   List<String> videoUrls = [];
+ 
+  final ImagePicker _picker = ImagePicker();
+
+  @override
+  void initState() {
+    super.initState();
+    fetchVideos();
+  }
 
   Future<void> _pickVideo() async {
     final picker = ImagePicker();
@@ -23,7 +34,6 @@ class _UploadScreenState extends State<UploadScreen> {
     setState(() {
       _video = pickedVideo;
       _videoPath = pickedVideo?.name;
-      print("path: " + _videoPath!);
     });
   }
 
@@ -31,12 +41,9 @@ class _UploadScreenState extends State<UploadScreen> {
     if (_video == null) return;
 
     final url = Uri.parse('$apiBaseUrl/api/videos/upload');
-    final request = http.MultipartRequest('POST', url);
-    request.fields['filename'] = _video!.name;
-    request.fields['path'] =
-        '/uploads/${_video!.name}'; // သင့် server ပေါ်က uploads folder အတိုင်း
+    final request = http.MultipartRequest('POST', url)..fields['name'] =_video!.name;
 
-    // Read video data as bytes
+    // Read video data as bytes 
     final bytes = await _video!.readAsBytes();
 
     // Create MultipartFile from bytes
@@ -58,10 +65,21 @@ class _UploadScreenState extends State<UploadScreen> {
     }
   }
 
+    Future<void> fetchVideos() async {
+    final response = http.get(Uri.parse('$apiBaseUrl/api/videos/'));
+    final data = jsonDecode((await response).body);
+    print(data);
+
+    setState(() {
+     videoUrls = data.map<String>((item) => item['path'].toString()).toList();
+     print(videoUrls!);
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("Upload Video")),
+      appBar: AppBar(title: Text('Video Upload & Play')),
       body: Column(
         children: [
           ElevatedButton.icon(
@@ -75,55 +93,10 @@ class _UploadScreenState extends State<UploadScreen> {
             icon: Icon(Icons.upload),
             label: Text("Upload Video"),
           ),
+          SizedBox(height: 20),
+        
         ],
       ),
     );
-  }
-}
-
-class VideoList extends StatefulWidget {
-  final List<String> videoUrls;
-
-  VideoList({required this.videoUrls});
-
-  @override
-  _VideoListState createState() => _VideoListState();
-}
-
-class _VideoListState extends State<VideoList> {
-  late VideoPlayerController _controller;
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return ListView.builder(
-      itemCount: widget.videoUrls.length,
-      itemBuilder: (context, index) {
-        return FutureBuilder(
-          future: initializeVideoPlayer(widget.videoUrls[index]),
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.done) {
-              return AspectRatio(
-                aspectRatio: _controller.value.aspectRatio,
-                child: VideoPlayer(_controller),
-              );
-            } else {
-              return Center(child: CircularProgressIndicator());
-            }
-          },
-        );
-      },
-    );
-  }
-
-  Future<void> initializeVideoPlayer(String url) async {
-    _controller = VideoPlayerController.network(url);
-    await _controller.initialize();
-    setState(() {});
   }
 }

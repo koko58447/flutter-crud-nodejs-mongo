@@ -1,0 +1,55 @@
+import 'package:flutter/material.dart';
+import 'package:excel/excel.dart';
+import 'package:flutter_email_sender/flutter_email_sender.dart';
+import 'dart:io';
+import 'package:path_provider/path_provider.dart';
+import 'package:open_file/open_file.dart';
+import 'package:share_plus/share_plus.dart';
+
+class Exportexcel extends StatefulWidget {
+  const Exportexcel({super.key});
+
+  @override
+  State<Exportexcel> createState() => _ExportexcelState();
+}
+
+class _ExportexcelState extends State<Exportexcel> {
+  Future<void> _createAndSaveExcel() async {
+    final excel = Excel.createExcel();
+    final sheet = excel['Sheet1'];
+
+    // ဒေတာထည့်ပါ
+    sheet.cell(CellIndex.indexByString("A1")).value = TextCellValue("Name");
+    sheet.cell(CellIndex.indexByString("B1")).value = TextCellValue("Age");
+    sheet.cell(CellIndex.indexByString("A2")).value = TextCellValue("Mg Mg");
+    sheet.cell(CellIndex.indexByString("B2")).value = TextCellValue("25");
+
+    // File Path ရယူပါ
+    final directory = await getApplicationDocumentsDirectory();
+    final fileBytes = excel.encode()!;
+    final file = File("${directory.path}/sample.xlsx")
+      ..writeAsBytesSync(fileBytes);
+
+      await Share.shareXFiles(
+        [XFile(file.path)],
+        text: 'Please check the attached Excel file.',
+      );
+
+    // Open file
+    // OpenFile.open(file.path);
+
+   
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Create Excel File')),
+      body: const Center(child: Text('Press the button to create Excel')),
+      floatingActionButton: FloatingActionButton(
+        onPressed: _createAndSaveExcel,
+        child: const Icon(Icons.save),
+      ),
+    );
+  }
+}

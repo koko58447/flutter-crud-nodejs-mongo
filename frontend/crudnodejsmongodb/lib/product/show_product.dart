@@ -206,24 +206,15 @@ class _ShowProductState extends State<ShowProduct> {
             child: const Icon(Icons.file_download),
             label: 'Export CSV',
             backgroundColor: Colors.green,
-            onTap: () => exportListToCSV(
-              data: _filteredProducts,
-              headers: ["Name", "Price", "Supplier", "Qty", "Category"],
-              fields: ['name', 'price', 'suppliername', 'qty', 'categoryname'],
-              fileName: 'product.csv',
-            ), // Call the exportToCSV function
+            onTap: () => createAndShareExcel(headers: ["Name", "Price","Qty","Supplier","Category"], rows: _filteredProducts.map((user) => [user['name'], user['price'], user['qty'], user['suppliername'], user['categoryname']]).toList(),
+              fileName: 'products.csv'),
           ),
           SpeedDialChild(
             child: const Icon(Icons.table_chart),
             label: 'Export Excel',
             backgroundColor: Colors.orange,
-            onTap: () => exportListToExcel(
-              data: _filteredProducts,
-              sheetName: 'Product',
-              headers: ["Name", "Price", "Supplier", "Qty", "Category"],
-              fields: ['name', 'price', 'suppliername', 'qty', 'categoryname'],
-              fileName: 'products.xlsx',
-            ), // Call the exportToExcel function
+            onTap: () => createAndShareExcel(headers: ["Name", "Price","Qty","Supplier","Category"], rows: _filteredProducts.map((user) => [user['name'], user['price'], user['qty'], user['suppliername'], user['categoryname']]).toList(),
+              fileName: 'products.xlsx'),
           ),
           SpeedDialChild(
             child: const Icon(Icons.add),

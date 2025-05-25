@@ -22,10 +22,11 @@ const upload = multer({ storage });
 // Upload an image
 router.post('/upload', upload.single('video'), async (req, res) => {
     console.log(req.body);
+    const path = `/uploadvideos/${req.file.filename}`;
     try {
         const newUpload = new Video({
-            finename: req.body.filename,
-            path: req.file.path
+            name: req.body.name,
+            path: path
         });
         const savedUpload = await newUpload.save();
         res.status(201).json(savedUpload);
@@ -38,6 +39,7 @@ router.post('/upload', upload.single('video'), async (req, res) => {
 router.get('/', async (req, res) => {
     try {
         const uploads = await Video.find().sort({ _id: -1 });
+        console.log(uploads);
         res.json(uploads);
     } catch (err) {
         res.status(500).json({ error: err.message });

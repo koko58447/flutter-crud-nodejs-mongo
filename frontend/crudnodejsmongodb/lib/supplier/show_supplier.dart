@@ -252,24 +252,15 @@ class _SupplierState extends State<Supplier> {
             child: const Icon(Icons.file_download),
             label: 'Export CSV',
             backgroundColor: Colors.green,
-            onTap: () => exportListToCSV(
-              data: filteredSuppliers,
-              headers: ["Name", "Email", "Phone", "Address", "Gmail", "FBacc"],
-              fields: ['name', 'email', 'phone', 'address', 'gmail', 'fbacc'],
-              fileName: 'suppliers.csv',
-            ), // Call the exportToCSV function
+            onTap: () => createAndShareExcel(headers: ["Name", "Email","Phone","Address","Gmail","Fbacc"], rows: filteredSuppliers.map((user) => [user['name'], user['email'], user['phone'], user['address'], user['gmail'], user['fbacc']]).toList(),
+              fileName: 'supplier.csv'),
           ),
           SpeedDialChild(
             child: const Icon(Icons.table_chart),
             label: 'Export Excel',
             backgroundColor: Colors.orange,
-            onTap: () => exportListToExcel(
-              data: filteredSuppliers,
-              sheetName: 'Supplier',
-              headers: ["Name", "Email", "Phone", "Address", "Gmail", "FBacc"],
-              fields: ['name', 'email', 'phone', 'address', 'gmail', 'fbacc'],
-              fileName: 'suppliers.xlsx',
-            ), // Call the exportToExcel function
+            onTap: () => createAndShareExcel(headers: ["Name", "Email","Phone","Address","Gmail","Fbacc"], rows: filteredSuppliers.map((user) => [user['name'], user['email'], user['phone'], user['address'], user['gmail'], user['fbacc']]).toList(),
+              fileName: 'supplier.xlsx'),
           ),
           SpeedDialChild(
             child: const Icon(Icons.add),
