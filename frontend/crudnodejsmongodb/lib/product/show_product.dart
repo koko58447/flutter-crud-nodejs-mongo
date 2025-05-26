@@ -70,14 +70,16 @@ class _ShowProductState extends State<ShowProduct> {
         _filteredProducts = _products;
       } else {
         _filteredProducts = _products
-            .where((product) =>
-                product['name'].toLowerCase().contains(query.toLowerCase()) ||
-                product['categoryname']
-                    .toLowerCase()
-                    .contains(query.toLowerCase()) ||
-                product['suppliername']
-                    .toLowerCase()
-                    .contains(query.toLowerCase()))
+            .where(
+              (product) =>
+                  product['name'].toLowerCase().contains(query.toLowerCase()) ||
+                  product['categoryname'].toLowerCase().contains(
+                    query.toLowerCase(),
+                  ) ||
+                  product['suppliername'].toLowerCase().contains(
+                    query.toLowerCase(),
+                  ),
+            )
             .toList();
       }
     });
@@ -88,6 +90,99 @@ class _ShowProductState extends State<ShowProduct> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Products with Suppliers'),
+        actions: [
+          IconButton(
+            tooltip: "Refresh",
+            icon: const Icon(Icons.refresh),
+            onPressed: fetchAllData,
+          ),
+          PopupMenuButton(
+            tooltip: "Export Data",
+            itemBuilder: (context) => [
+              PopupMenuItem(
+                value: "pdf",
+                child: Row(
+                  children: const [
+                    Icon(Icons.picture_as_pdf, color: Colors.blue),
+                    SizedBox(width: 8.0),
+                    Text('Export PDF'),
+                  ],
+                ),
+              ),
+              PopupMenuItem(
+                value: "csv",
+                child: Row(
+                  children: const [
+                    Icon(Icons.file_download, color: Colors.blue),
+                    SizedBox(width: 8.0),
+                    Text('Export CSV'),
+                  ],
+                ),
+              ),
+              PopupMenuItem(
+                value: "excel",
+                child: Row(
+                  children: const [
+                    Icon(Icons.table_chart, color: Colors.blue),
+                    SizedBox(width: 8.0),
+                    Text('Export Excel'),
+                  ],
+                ),
+              ),
+            ],
+            onSelected: (value) {
+              if (value == 'pdf') {
+                createAndSharePrintPDF(
+                  headers: ["Name", "Price", "Qty", "Supplier", "Category"],
+                  rows: _filteredProducts
+                      .map(
+                        (user) => [
+                          user['name'],
+                          user['price'],
+                          user['qty'],
+                          user['suppliername'],
+                          user['categoryname'],
+                        ],
+                      )
+                      .toList(),
+                  fileName: 'products.pdf',
+                );
+              } else if (value == 'csv') {
+                createAndShareExportCSV(
+                  headers: ["Name", "Price", "Qty", "Supplier", "Category"],
+                  rows: _filteredProducts
+                      .map(
+                        (user) => [
+                          user['name'],
+                          user['price'],
+                          user['qty'],
+                          user['suppliername'],
+                          user['categoryname'],
+                        ],
+                      )
+                      .toList(),
+                  fileName: 'products.csv',
+                );
+              } else if (value == 'excel') {
+                createAndShareExcel(
+                  headers: ["Name", "Price", "Qty", "Supplier", "Category"],
+                  rows: _filteredProducts
+                      .map(
+                        (user) => [
+                          user['name'],
+                          user['price'],
+                          user['qty'],
+                          user['suppliername'],
+                          user['categoryname'],
+                        ],
+                      )
+                      .toList(),
+                  fileName: 'products.xlsx',
+                );
+              }
+            },
+          ),
+        ],
       ),
       body: Column(
         children: [
@@ -108,20 +203,21 @@ class _ShowProductState extends State<ShowProduct> {
             child: _isLoading
                 ? const Center(child: CircularProgressIndicator())
                 : _filteredProducts.isEmpty
-                    ? const Center(child: Text('No products found.'))
-                    : LayoutBuilder(
-                        builder: (context, constraints) {
-                          if (constraints.maxWidth < 700) {
-                            return MobileView(
-                              filteredSuppliers: _filteredProducts
-                                  .cast<Map<String, dynamic>>(),
-                              onDelete: (Map<dynamic, dynamic> user) =>
-                                  handleDelete(
+                ? const Center(child: Text('No products found.'))
+                : LayoutBuilder(
+                    builder: (context, constraints) {
+                      if (constraints.maxWidth < 700) {
+                        return MobileView(
+                          filteredSuppliers: _filteredProducts
+                              .cast<Map<String, dynamic>>(),
+                          onDelete: (Map<dynamic, dynamic> user) =>
+                              handleDelete(
                                 context: context,
                                 list: user,
                                 deleteCallback: (id) async {
-                                  final response = await http.delete(Uri.parse(
-                                      '$apiBaseUrl/api/products/$id'));
+                                  final response = await http.delete(
+                                    Uri.parse('$apiBaseUrl/api/products/$id'),
+                                  );
                                   if (response.statusCode != 200) {
                                     throw Exception("Failed to delete user");
                                   }
@@ -133,34 +229,35 @@ class _ShowProductState extends State<ShowProduct> {
                                   });
                                 },
                               ),
-                              columns: const [
-                                {'label': 'Name', 'key': 'name'},
-                                {'label': 'Price', 'key': 'price'},
-                                {'label': 'Quantity', 'key': 'qty'},
-                                {'label': 'Supplier', 'key': 'suppliername'},
-                                {'label': 'Category', 'key': 'categoryname'},
-                              ],
-                              onEdit: (Map<dynamic, dynamic> user) =>
-                                  handleEdit(
-                                context: context,
-                                list: user,
-                                fetchAllData:
-                                    fetchAllData, // Replace with your fetch function
-                                listFormBuilder: (user) => ProductForm(
-                                    product: user), // Pass UserForm here
-                              ),
-                            );
-                          } else {
-                            return TableView(
-                              filteredSuppliers: _filteredProducts
-                                  .cast<Map<String, dynamic>>(),
-                              onDelete: (Map<dynamic, dynamic> user) =>
-                                  handleDelete(
+                          columns: const [
+                            {'label': 'Name', 'key': 'name'},
+                            {'label': 'Price', 'key': 'price'},
+                            {'label': 'Quantity', 'key': 'qty'},
+                            {'label': 'Supplier', 'key': 'suppliername'},
+                            {'label': 'Category', 'key': 'categoryname'},
+                          ],
+                          onEdit: (Map<dynamic, dynamic> user) => handleEdit(
+                            context: context,
+                            list: user,
+                            fetchAllData:
+                                fetchAllData, // Replace with your fetch function
+                            listFormBuilder: (user) => ProductForm(
+                              product: user,
+                            ), // Pass UserForm here
+                          ),
+                        );
+                      } else {
+                        return TableView(
+                          filteredSuppliers: _filteredProducts
+                              .cast<Map<String, dynamic>>(),
+                          onDelete: (Map<dynamic, dynamic> user) =>
+                              handleDelete(
                                 context: context,
                                 list: user,
                                 deleteCallback: (id) async {
-                                  final response = await http.delete(Uri.parse(
-                                      '$apiBaseUrl/api/products/$id'));
+                                  final response = await http.delete(
+                                    Uri.parse('$apiBaseUrl/api/products/$id'),
+                                  );
                                   if (response.statusCode != 200) {
                                     throw Exception("Failed to delete user");
                                   }
@@ -172,62 +269,47 @@ class _ShowProductState extends State<ShowProduct> {
                                   });
                                 },
                               ),
-                              columns: const [
-                                {'label': 'Name', 'key': 'name'},
-                                {'label': 'Price', 'key': 'price'},
-                                {'label': 'Quantity', 'key': 'qty'},
-                                {'label': 'Supplier', 'key': 'suppliername'},
-                                {'label': 'Category', 'key': 'categoryname'},
-                              ],
-                              onEdit: (Map<dynamic, dynamic> user) =>
-                                  handleEdit(
-                                context: context,
-                                list: user,
-                                fetchAllData:
-                                    fetchAllData, // Replace with your fetch function
-                                listFormBuilder: (user) => ProductForm(
-                                    product: user), // Pass UserForm here
-                              ),
-                              title: 'Products With Supplier',
-                            );
-                          }
-                        },
-                      ),
+                          columns: const [
+                            {'label': 'Name', 'key': 'name'},
+                            {'label': 'Price', 'key': 'price'},
+                            {'label': 'Quantity', 'key': 'qty'},
+                            {'label': 'Supplier', 'key': 'suppliername'},
+                            {'label': 'Category', 'key': 'categoryname'},
+                          ],
+                          onEdit: (Map<dynamic, dynamic> user) => handleEdit(
+                            context: context,
+                            list: user,
+                            fetchAllData:
+                                fetchAllData, // Replace with your fetch function
+                            listFormBuilder: (user) => ProductForm(
+                              product: user,
+                            ), // Pass UserForm here
+                          ),
+                          title: 'Products With Supplier',
+                        );
+                      }
+                    },
+                  ),
           ),
         ],
       ),
-      floatingActionButton: SpeedDial(
-        icon: Icons.add, // Main FAB icon
-        activeIcon: Icons.close, // Icon when FAB is expanded
-        backgroundColor: Colors.blue,
+      floatingActionButton: FloatingActionButton(
+        tooltip: "Add Product",
+        onPressed: () async {
+          await navigateAndRefresh(
+            context: context,
+            formBuilder: () => const ProductForm(),
+            fetchAllData: fetchAllData,
+          );
+        },
+        backgroundColor: Colors.blueAccent,
         foregroundColor: Colors.white,
-        children: [
-          SpeedDialChild(
-            child: const Icon(Icons.file_download),
-            label: 'Export CSV',
-            backgroundColor: Colors.green,
-            onTap: () => createAndShareExcel(headers: ["Name", "Price","Qty","Supplier","Category"], rows: _filteredProducts.map((user) => [user['name'], user['price'], user['qty'], user['suppliername'], user['categoryname']]).toList(),
-              fileName: 'products.csv'),
-          ),
-          SpeedDialChild(
-            child: const Icon(Icons.table_chart),
-            label: 'Export Excel',
-            backgroundColor: Colors.orange,
-            onTap: () => createAndShareExcel(headers: ["Name", "Price","Qty","Supplier","Category"], rows: _filteredProducts.map((user) => [user['name'], user['price'], user['qty'], user['suppliername'], user['categoryname']]).toList(),
-              fileName: 'products.xlsx'),
-          ),
-          SpeedDialChild(
-            child: const Icon(Icons.add),
-            label: 'Add Product',
-            backgroundColor: Colors.blue,
-            onTap: () async {
-              await navigateAndRefresh(
-                  context: context,
-                  formBuilder: () => ProductForm(), // Pass the form widget
-                  fetchAllData: fetchAllData);
-            },
-          ),
-        ],
+        elevation: 6,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(30), // အဝိုင်းပုံစံ
+          side: BorderSide(color: Colors.grey.shade300, width: 1.5),
+        ),
+        child: const Icon(Icons.add, size: 30),
       ),
     );
   }

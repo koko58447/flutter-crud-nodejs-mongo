@@ -146,33 +146,18 @@ class _ProductFormState extends State<ProductForm> {
             padding: const EdgeInsets.all(8.0),
             child: Column(
               children: [
-                TextFormField(
+                CustomTextField(
+                  labelText: "Product Name",
+                  hintText: "Enter Product Name",
                   controller: _nameController,
-                  decoration: const InputDecoration(labelText: 'Product Name'),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter the product name';
-                    }
-                    return null;
-                  },
                 ),
-                TextFormField(
+                CustomTextField(
+                  labelText: "Price",
+                  hintText: "Enter Price",
                   controller: _priceController,
-                  decoration: const InputDecoration(labelText: 'Price'),
-                  keyboardType: TextInputType.number,
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter the price';
-                    }
-                    if (double.tryParse(value) == null) {
-                      return 'Please enter a valid number';
-                    }
-                    return null;
-                  },
                 ),
-                DropdownButtonFormField<String>(
+                CustomDropdownField(
                   value: _selectedSupplierId,
-                  decoration: const InputDecoration(labelText: 'Supplier'),
                   items: _suppliers.map((supplier) {
                     return DropdownMenuItem(
                       value: supplier['id'],
@@ -184,6 +169,8 @@ class _ProductFormState extends State<ProductForm> {
                       _selectedSupplierId = value;
                     });
                   },
+                  labelText: "Supplier",
+                  hintText: "Select Supplier",
                   validator: (value) {
                     if (value == null || value.isEmpty) {
                       return 'Please select a supplier';
@@ -191,13 +178,12 @@ class _ProductFormState extends State<ProductForm> {
                     return null;
                   },
                 ),
-                DropdownButtonFormField<String>(
+                CustomDropdownField(
                   value: _selectedCategoryId,
-                  decoration: const InputDecoration(labelText: 'Category'),
-                  items: _categorys.map((supplier) {
+                  items: _categorys.map((category) {
                     return DropdownMenuItem(
-                      value: supplier['id'],
-                      child: Text(supplier['name']!),
+                      value: category['id'],
+                      child: Text(category['name']!),
                     );
                   }).toList(),
                   onChanged: (value) {
@@ -205,6 +191,8 @@ class _ProductFormState extends State<ProductForm> {
                       _selectedCategoryId = value;
                     });
                   },
+                  labelText: "Category",
+                  hintText: "Select Category",
                   validator: (value) {
                     if (value == null || value.isEmpty) {
                       return 'Please select a category';
@@ -212,24 +200,16 @@ class _ProductFormState extends State<ProductForm> {
                     return null;
                   },
                 ),
-                TextFormField(
+                CustomTextField(
+                  labelText: "Qty",
+                  hintText: "Enter Qty",
                   controller: _qtyController,
-                  decoration: const InputDecoration(labelText: 'Qty'),
-                  keyboardType: TextInputType.number,
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter the Qty quantity';
-                    }
-                    if (int.tryParse(value) == null) {
-                      return 'Please enter a valid number';
-                    }
-                    return null;
-                  },
                 ),
                 const SizedBox(height: 20),
-                ElevatedButton(
+                CustomElevatedButton(
                   onPressed: _submitForm,
-                  child: const Text('Submit'),
+                  text: "Save",
+                  icon: Icons.save,
                 ),
               ],
             ),

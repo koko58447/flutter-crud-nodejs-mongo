@@ -1,3 +1,4 @@
+import 'package:crudnodejsmongodb/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -28,9 +29,7 @@ class _CategoryFormState extends State<CategoryForm> {
 
     final method = widget.user == null ? http.post : http.put;
 
-    final body = {
-      'name': nameController.text,
-    };
+    final body = {'name': nameController.text};
 
     final response = await method(
       Uri.parse(url),
@@ -47,16 +46,23 @@ class _CategoryFormState extends State<CategoryForm> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-          title: Text(widget.user == null ? 'Add Category' : 'Edit Category')),
+        title: Text(widget.user == null ? 'Add Category' : 'Edit Category'),
+      ),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
-            TextField(
-                controller: nameController,
-                decoration: const InputDecoration(labelText: 'Name')),
+            CustomTextField(
+              labelText: "Name",
+              hintText: "Enter Name",
+              controller: nameController,
+            ),
             const SizedBox(height: 20),
-            ElevatedButton(onPressed: saveUser, child: const Text('Save'))
+            CustomElevatedButton(
+              onPressed: saveUser,
+              text: 'Save',
+              icon: Icons.save,
+            ),
           ],
         ),
       ),

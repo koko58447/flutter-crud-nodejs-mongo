@@ -79,7 +79,84 @@ class _ShowCategoryState extends State<ShowCategory> {
     final screenWidth = MediaQuery.of(context).size.width;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Category Management')),
+      appBar: AppBar(
+        title: const Text('Category Management'),
+        actions: [
+          IconButton(
+            tooltip: "Refresh",
+            icon: const Icon(Icons.refresh),
+            onPressed: fetchAllData,
+          ),
+          PopupMenuButton(
+            tooltip: "Export Data",
+            itemBuilder: (context) => [
+              PopupMenuItem(
+                value: 'pdf',
+                child: Row(
+                  children: [
+                    const Icon(Icons.picture_as_pdf, color: Colors.blue),
+                    const Text("Export PDF"),
+                  ],
+                ),
+                onTap: () => createAndSharePrintPDF(
+                  headers: ["Name"],
+                  rows: filterCategory.map((user) => [user['name']]).toList(),
+                  fileName: 'categorys.pdf',
+                ),
+              ),
+              PopupMenuItem(
+                value: 'csv',
+                child: Row(
+                  children: [
+                    const Icon(Icons.file_download, color: Colors.blue),
+                    const Text("Export CSV"),
+                  ],
+                ),
+                onTap: () => createAndShareExportCSV(
+                  headers: ["Name"],
+                  rows: filterCategory.map((user) => [user['name']]).toList(),
+                  fileName: 'categorys.csv',
+                ),
+              ),
+              PopupMenuItem(
+                value: 'excel',
+                child: Row(
+                  children: [
+                    const Icon(Icons.table_chart, color: Colors.blue),
+                    const Text("Export Excel"),
+                  ],
+                ),
+                onTap: () => createAndShareExcel(
+                  headers: ["Name"],
+                  rows: filterCategory.map((user) => [user['name']]).toList(),
+                  fileName: 'categorys.xlsx',
+                ),
+              ),
+            ],
+            onSelected: (value) {
+              if (value == 'excel') {
+                createAndShareExcel(
+                  headers: ["Name"],
+                  rows: filterCategory.map((user) => [user['name']]).toList(),
+                  fileName: 'categorys.xlsx',
+                );
+              } else if (value == 'csv') {
+                createAndShareExportCSV(
+                  headers: ["Name"],
+                  rows: filterCategory.map((user) => [user['name']]).toList(),
+                  fileName: 'categorys.csv',
+                );
+              } else if (value == 'pdf') {
+                createAndSharePrintPDF(
+                  headers: ["Name"],
+                  rows: filterCategory.map((user) => [user['name']]).toList(),
+                  fileName: 'categorys.pdf',
+                );
+              }
+            },
+          ),
+        ],
+      ),
       body: Column(
         children: [
           Padding(
@@ -171,39 +248,22 @@ class _ShowCategoryState extends State<ShowCategory> {
           ),
         ],
       ),
-      floatingActionButton: SpeedDial(
-        icon: Icons.add, // Main FAB icon
-        activeIcon: Icons.close, // Icon when FAB is expanded
-        backgroundColor: Colors.blue,
+      floatingActionButton: FloatingActionButton(
+        onPressed: () async {
+          await navigateAndRefresh(
+            context: context,
+            formBuilder: () => const CategoryForm(),
+            fetchAllData: fetchAllData,
+          );
+        },
+        backgroundColor: Colors.blueAccent,
         foregroundColor: Colors.white,
-        children: [
-          SpeedDialChild(
-            child: const Icon(Icons.file_download),
-            label: 'Export CSV',
-            backgroundColor: Colors.green,
-            onTap: () => createAndShareExcel(headers: ["Name"], rows: filterCategory.map((user) => [user['name']]).toList(),
-              fileName: 'categorys.csv'),
-          ),
-          SpeedDialChild(
-            child: const Icon(Icons.table_chart),
-            label: 'Export Excel',
-            backgroundColor: Colors.orange,
-            onTap: () => createAndShareExcel(headers: ["Name"], rows: filterCategory.map((user) => [user['name']]).toList(),
-              fileName: 'categorys.xlsx'),
-          ),
-          SpeedDialChild(
-            child: const Icon(Icons.add),
-            label: 'Add Category',
-            backgroundColor: Colors.blue,
-            onTap: () async {
-              await navigateAndRefresh(
-                context: context,
-                formBuilder: () => const CategoryForm(), // Pass the form widget
-                fetchAllData: fetchAllData, // Pass the data refresh function
-              );
-            },
-          ),
-        ],
+        elevation: 6,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(30), // အဝိုင်းပုံစံ
+          side: BorderSide(color: Colors.grey.shade300, width: 1.5),
+        ),
+        child: const Icon(Icons.add, size: 30),
       ),
     );
   }

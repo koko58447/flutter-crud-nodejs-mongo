@@ -178,8 +178,127 @@ class _SupplierState extends State<Supplier> {
         title: const Text("Supplier Management"),
         actions: [
           IconButton(
+            tooltip: "Select Date Range",
             icon: const Icon(Icons.date_range),
             onPressed: () => openDateRangePicker(context),
+          ),
+          IconButton(
+            tooltip: "Refresh Supplier List",
+            icon: const Icon(Icons.refresh),
+            onPressed: () async {
+              await fetchUsers(dateRange: selectedDateRange);
+              showSnackBar("Supplier list refreshed.");
+            },
+          ),
+          PopupMenuButton(
+            tooltip: "Exports Data",
+            itemBuilder: (context) => [
+              PopupMenuItem(
+                value: 'export_pdf',
+                child: Row(
+                  children: [
+                    const Icon(
+                      Icons.picture_as_pdf_outlined,
+                      color: Colors.blue,
+                    ),
+                    const Text('Export PDF'),
+                  ],
+                ),
+              ),
+              PopupMenuItem(
+                value: 'export_csv',
+                child: Row(
+                  children: [
+                    const Icon(Icons.file_download, color: Colors.blue),
+                    const Text('Export CSV'),
+                  ],
+                ),
+              ),
+              PopupMenuItem(
+                value: 'export_excel',
+                child: Row(
+                  children: [
+                    const Icon(Icons.table_chart, color: Colors.blue),
+                    const Text('Export Excel'),
+                  ],
+                ),
+              ),
+            ],
+            onSelected: (value) {
+              if (value == 'export_pdf') {
+                createAndSharePrintPDF(
+                  headers: [
+                    "Name",
+                    "Email",
+                    "Phone",
+                    "Address",
+                    "Gmail",
+                    "Fbacc",
+                  ],
+                  rows: filteredSuppliers
+                      .map(
+                        (user) => [
+                          user['name'],
+                          user['email'],
+                          user['phone'],
+                          user['address'],
+                          user['gmail'],
+                          user['fbacc'],
+                        ],
+                      )
+                      .toList(),
+                  fileName: 'supplier.pdf',
+                );
+              } else if (value == 'export_csv') {
+                createAndShareExportCSV(
+                  headers: [
+                    "Name",
+                    "Email",
+                    "Phone",
+                    "Address",
+                    "Gmail",
+                    "Fbacc",
+                  ],
+                  rows: filteredSuppliers
+                      .map(
+                        (user) => [
+                          user['name'],
+                          user['email'],
+                          user['phone'],
+                          user['address'],
+                          user['gmail'],
+                          user['fbacc'],
+                        ],
+                      )
+                      .toList(),
+                  fileName: 'supplier.csv',
+                );
+              } else if (value == 'export_excel') {
+                createAndShareExcel(
+                  headers: [
+                    "Name",
+                    "Email",
+                    "Phone",
+                    "Address",
+                    "Gmail",
+                    "Fbacc",
+                  ],
+                  rows: filteredSuppliers
+                      .map(
+                        (user) => [
+                          user['name'],
+                          user['email'],
+                          user['phone'],
+                          user['address'],
+                          user['gmail'],
+                          user['fbacc'],
+                        ],
+                      )
+                      .toList(),
+                  fileName: 'supplier.xlsx',
+                );
+              }
+            },
           ),
         ],
       ),
@@ -242,39 +361,23 @@ class _SupplierState extends State<Supplier> {
           ),
         ],
       ),
-      floatingActionButton: SpeedDial(
-        icon: Icons.add, // Main FAB icon
-        activeIcon: Icons.close, // Icon when FAB is expanded
-        backgroundColor: Colors.blue,
+      floatingActionButton: FloatingActionButton(
+        tooltip: "Add New Supplier",
+        onPressed: () async {
+          await navigateAndRefresh(
+            context: context,
+            formBuilder: () => const SupplierForm(),
+            fetchAllData: fetchUsers,
+          );
+        },
+        backgroundColor: Colors.blueAccent,
         foregroundColor: Colors.white,
-        children: [
-          SpeedDialChild(
-            child: const Icon(Icons.file_download),
-            label: 'Export CSV',
-            backgroundColor: Colors.green,
-            onTap: () => createAndShareExcel(headers: ["Name", "Email","Phone","Address","Gmail","Fbacc"], rows: filteredSuppliers.map((user) => [user['name'], user['email'], user['phone'], user['address'], user['gmail'], user['fbacc']]).toList(),
-              fileName: 'supplier.csv'),
-          ),
-          SpeedDialChild(
-            child: const Icon(Icons.table_chart),
-            label: 'Export Excel',
-            backgroundColor: Colors.orange,
-            onTap: () => createAndShareExcel(headers: ["Name", "Email","Phone","Address","Gmail","Fbacc"], rows: filteredSuppliers.map((user) => [user['name'], user['email'], user['phone'], user['address'], user['gmail'], user['fbacc']]).toList(),
-              fileName: 'supplier.xlsx'),
-          ),
-          SpeedDialChild(
-            child: const Icon(Icons.add),
-            label: 'Add Supplier',
-            backgroundColor: Colors.blue,
-            onTap: () async {
-              final result = await Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => SupplierForm()),
-              );
-              if (result == true) fetchUsers();
-            },
-          ),
-        ],
+        elevation: 6,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(30), // အဝိုင်းပုံစံ
+          side: BorderSide(color: Colors.grey.shade300, width: 1.5),
+        ),
+        child: const Icon(Icons.add, size: 30),
       ),
     );
   }

@@ -44,9 +44,7 @@ dependencies:
   fl_chart: ^1.0.0
   archive: ^3.3.7
   intl: ^0.20.2
-  # bluetooth_thermal_printer: ^0.0.6
-  image: ^3.3.0
-  # esc_pos_utils: ^1.1.0
+  image: ^4.3.0
   video_player: ^2.9.5
   mobile_scanner: ^4.0.0
   flutter_localization: ^0.3.2
@@ -54,6 +52,9 @@ dependencies:
   open_file: ^3.5.10
   flutter_email_sender: ^7.0.0
   share_plus: ^11.0.0
+  universal_html: ^2.2.4
+  pdf: ^3.8.4
+  printing: ^5.14.0
 
 dev_dependencies:
   flutter_test:

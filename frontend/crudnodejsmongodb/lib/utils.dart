@@ -1,4 +1,3 @@
-
 import 'dart:io';
 
 import 'package:easy_localization/easy_localization.dart';
@@ -13,6 +12,80 @@ import 'package:path_provider/path_provider.dart';
 import 'package:excel/excel.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:universal_html/html.dart' as mylib;
+import 'package:pdf/pdf.dart';
+import 'package:pdf/widgets.dart' as pw;
+import 'package:printing/printing.dart';
+
+Future<void> createAndSharePrintPDF({
+  required List<String> headers,
+  required List<List<dynamic>> rows,
+  String fileName = 'export.pdf',
+}) async {
+  final pdf = pw.Document();
+
+  // PDF တွင် Table ထည့်ပါ
+  pdf.addPage(
+    pw.Page(
+      build: (pw.Context context) {
+        return pw.Table.fromTextArray(
+          headers: headers,
+          data: rows
+              .map((row) => row.map((cell) => cell.toString()).toList())
+              .toList(),
+        );
+      },
+    ),
+  );
+
+  if (kIsWeb) {
+    // 🌐 Web မှာ PDF ကို browser မှာ preview/download လုပ်ပါ
+    await Printing.layoutPdf(onLayout: (format) async => pdf.save());
+  } else {
+    // 📱 Mobile မှာ PDF ကို save သို့မဟုတ် print လုပ်ပါ
+    final output = await getTemporaryDirectory();
+    final file = File('${output.path}/$fileName');
+    await file.writeAsBytes(await pdf.save());
+
+    // Share လုပ်ပါ
+    await Share.shareXFiles([XFile(file.path)], text: 'PDF Report Attached');
+  }
+}
+
+Future<void> createAndShareExportCSV({
+  required List<String> headers,
+  required List<List<dynamic>> rows,
+  String fileName = 'export.csv',
+}) async {
+  // Header ထည့်ပါ
+  final csv = StringBuffer();
+  csv.writeln(headers.join(','));
+
+  // Rows ထည့်ပါ
+  for (var row in rows) {
+    csv.writeln(row.map((cell) => '"$cell"').join(','));
+  }
+
+  if (kIsWeb) {
+    // 🔁 Web အတွက် – Browser မှာ download လုပ်ပါ
+    final blob = mylib.Blob([csv.toString()], 'text/csv');
+    final url = mylib.Url.createObjectUrlFromBlob(blob);
+    final anchor = mylib.AnchorElement()
+      ..href = url
+      ..download = "$fileName"
+      ..click();
+    mylib.Url.revokeObjectUrl(url);
+  } else {
+    // 📱 Mobile အတွက် – File သိမ်းပြီး Share လုပ်ပါ
+    final directory = await getApplicationDocumentsDirectory();
+    final filePath = '${directory.path}/$fileName';
+    final file = File(filePath)..writeAsStringSync(csv.toString());
+
+    await Share.shareXFiles([
+      XFile(file.path),
+    ], text: 'Please check the attached CSV file.');
+  }
+}
 
 Future<void> createAndShareExcel({
   required List<String> headers,
@@ -25,9 +98,8 @@ Future<void> createAndShareExcel({
 
   // Headers ထည့်ပါ (A1, B1, C1 ...)
   for (int i = 0; i < headers.length; i++) {
-    sheet
-        .cell(CellIndex.indexByColumnRow(columnIndex: i, rowIndex: 0))
-        .value = TextCellValue(headers[i]);
+    sheet.cell(CellIndex.indexByColumnRow(columnIndex: i, rowIndex: 0)).value =
+        TextCellValue(headers[i]);
   }
 
   // Rows ထည့်ပါ (A2, B2, A3, B3 ...)
@@ -35,74 +107,41 @@ Future<void> createAndShareExcel({
     final rowData = rows[rowIdx];
     for (int colIdx = 0; colIdx < rowData.length; colIdx++) {
       sheet
-          .cell(CellIndex.indexByColumnRow(
-              columnIndex: colIdx, rowIndex: rowIdx + 1))
-          .value = TextCellValue(rowData[colIdx].toString());
+          .cell(
+            CellIndex.indexByColumnRow(
+              columnIndex: colIdx,
+              rowIndex: rowIdx + 1,
+            ),
+          )
+          .value = TextCellValue(
+        rowData[colIdx].toString(),
+      );
     }
   }
 
-  // File Path ရယူပါ
-  final directory = await getApplicationDocumentsDirectory();
-  final filePath = '${directory.path}/$fileName';
-  final file = File(filePath)..writeAsBytesSync(excel.encode()!);
+  if (kIsWeb) {
+    // 🔁 Web အတွက် – Browser မှာ download လုပ်ပါ
+    final bytes = excel.encode()!;
+    final blob = mylib.Blob([
+      bytes,
+    ], 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    final url = mylib.Url.createObjectUrlFromBlob(blob);
+    final anchor = mylib.AnchorElement()
+      ..href = url
+      ..download = "$fileName"
+      ..click();
+    mylib.Url.revokeObjectUrl(url);
+  } else {
+    // File Path ရယူပါ
+    final directory = await getApplicationDocumentsDirectory();
+    final filePath = '${directory.path}/$fileName';
+    final file = File(filePath)..writeAsBytesSync(excel.encode()!);
 
-  // Share ပြုလုပ်ပါ
-  await Share.shareXFiles(
-    [XFile(file.path)],
-    text: 'Please check the attached Excel file.',
-  );
-}
-
-Future<void> exportListToExcelWeb({
-  required List data,
-  required String sheetName,
-  required List<String> headers,
-  required List<String> fields,
-  required String fileName,
-}) async {
-  // var excel = Excel.createExcel();
-  // Sheet sheetObject = excel[sheetName];
-  // sheetObject.appendRow(headers);
-
-  // for (var item in data) {
-  //   sheetObject.appendRow([for (var field in fields) item[field]]);
-  // }
-
-  // final excelBytes = excel.encode();
-
-  // final blob = html.Blob([excelBytes]);
-  // final url = html.Url.createObjectUrlFromBlob(blob);
-  // final anchor = html.AnchorElement(href: url)
-  //   ..target = 'blank'
-  //   ..download = fileName
-  //   ..click();
-  // html.Url.revokeObjectUrl(url);
-
-  //   final Directory dir = await getApplicationDocumentsDirectory();
-  // final String path = '${dir.path}/$fileName';
-  // final File file = File(path)..writeAsBytesSync(excelBytes!);
-
-  // OpenFilex.open(path);
-}
-
-void exportListToCSVweb({
-  required List data,
-  required List<String> headers,
-  required List<String> fields,
-  String fileName = 'export.csv',
-}) {
-  // List<List<dynamic>> rows = [headers];
-  // for (var item in data) {
-  //   rows.add([for (var field in fields) item[field]]);
-  // }
-  // String csvData = const ListToCsvConverter().convert(rows);
-  // final bytes = html.Blob([csvData]);
-  // final url = html.Url.createObjectUrlFromBlob(bytes);
-  // final anchor = html.AnchorElement(href: url)
-  //   ..target = 'blank'
-  //   ..download = fileName
-  //   ..click();
-  // html.Url.revokeObjectUrl(url);
+    // Share ပြုလုပ်ပါ
+    await Share.shareXFiles([
+      XFile(file.path),
+    ], text: 'Please check the attached Excel file.');
+  }
 }
 
 //mobile view and table view
@@ -173,6 +212,27 @@ class MobileView extends StatelessWidget {
                         style: TextStyle(color: Colors.blue),
                       ),
                       onPressed: () => onEdit(supplier),
+                      style: TextButton.styleFrom(
+                        foregroundColor: Colors.blue,
+                        backgroundColor: Colors.blue.withOpacity(0.1),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 8,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(
+                            20,
+                          ), // အဝိုင်းပုံစံ
+                          side: BorderSide(color: Colors.blue.withOpacity(0.6)),
+                        ),
+                        textStyle: const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                        ),
+                        elevation: 2,
+                        shadowColor: Colors.blue.withOpacity(0.3),
+                        minimumSize: const Size(100, 40),
+                      ),
                     ),
                     const SizedBox(width: 8),
                     TextButton.icon(
@@ -182,6 +242,27 @@ class MobileView extends StatelessWidget {
                         style: TextStyle(color: Colors.red),
                       ),
                       onPressed: () => onDelete(supplier),
+                      style: TextButton.styleFrom(
+                        foregroundColor: Colors.blue,
+                        backgroundColor: Colors.blue.withOpacity(0.1),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 8,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(
+                            20,
+                          ), // အဝိုင်းပုံစံ
+                          side: BorderSide(color: Colors.blue.withOpacity(0.6)),
+                        ),
+                        textStyle: const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                        ),
+                        elevation: 2,
+                        shadowColor: Colors.blue.withOpacity(0.3),
+                        minimumSize: const Size(100, 40),
+                      ),
                     ),
                   ],
                 ),
@@ -212,30 +293,48 @@ class TableView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    List<Map<String, String>> columnsWithIndex = List.from(columns);
+    columnsWithIndex.insert(0, {'key': 'index', 'label': '#'});
+
     return LayoutBuilder(
       builder: (context, constraints) {
         return SingleChildScrollView(
           child: SizedBox(
-            width: constraints.maxWidth, // Full width
-            child: PaginatedDataTable(
-              header: Text(title),
-              columns:
-                  columns
-                      .map(
-                        (column) => DataColumn(label: Text(column['label']!)),
-                      )
-                      .toList()
-                    ..add(
+            width: constraints.maxWidth,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ),
+                  child: Text('Total: ${filteredSuppliers.length} records'),
+                ),
+                SizedBox(
+                  // 👈 ဒီနေရာမှာ full width သေချာစေဖို့
+                  width: double.infinity,
+                  child: PaginatedDataTable(
+                    header: Text(title),
+                    columns: [
+                      const DataColumn(label: Text('#')),
+                      ...columns.map(
+                        (col) => DataColumn(label: Text(col['label']!)),
+                      ),
                       const DataColumn(label: Text('Actions')),
-                    ), // Add actions column
-              source: _UserDataSource(
-                filteredSuppliers: filteredSuppliers,
-                onEdit: onEdit,
-                onDelete: onDelete,
-                columns: columns,
-              ),
-              columnSpacing: 20, // Adjust spacing between columns
-              horizontalMargin: 10, // Adjust horizontal margin
+                    ],
+                    source: _UserDataSource(
+                      filteredSuppliers: filteredSuppliers,
+                      onEdit: onEdit,
+                      onDelete: onDelete,
+                      columns: columns,
+                    ),
+                    columnSpacing: 20,
+                    horizontalMargin: 10,
+                    // optional: dataRowHeight, headingRowHeight တွေပြင်လို့ရပါတယ်
+                  ),
+                ),
+              ],
             ),
           ),
         );
@@ -257,27 +356,51 @@ class _UserDataSource extends DataTableSource {
     required this.columns,
   });
 
-  @override
   DataRow? getRow(int index) {
     if (index >= filteredSuppliers.length) return null;
 
     final supplier = filteredSuppliers[index];
     return DataRow(
       cells: [
+        DataCell(Text('${index + 1}')), // Row number
         ...columns.map((column) {
           final key = column['key']!;
           return DataCell(Text(supplier[key]?.toString() ?? 'N/A'));
-        }).toList(),
+        }),
         DataCell(
           Row(
             children: [
               IconButton(
-                icon: const Icon(Icons.edit, color: Colors.blue),
+                tooltip: tr("button.edit"), // Use translation
+                icon: Icon(Icons.edit, color: Colors.blue),
                 onPressed: () => onEdit(supplier),
+                style: TextButton.styleFrom(
+                  foregroundColor: Colors.blue,
+                  backgroundColor: Colors.blue.withOpacity(0.1),
+                  padding: EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20),
+                    side: BorderSide(color: Colors.blue.withOpacity(0.6)),
+                  ),
+                  elevation: 2,
+                  shadowColor: Colors.blue.withOpacity(0.3),
+                ),
               ),
               IconButton(
-                icon: const Icon(Icons.delete, color: Colors.red),
+                tooltip: tr("button.delete"),
+                icon: Icon(Icons.delete, color: Colors.red),
                 onPressed: () => onDelete(supplier),
+                style: TextButton.styleFrom(
+                  foregroundColor: Colors.red,
+                  backgroundColor: Colors.red.withOpacity(0.1),
+                  padding: EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20),
+                    side: BorderSide(color: Colors.red.withOpacity(0.6)),
+                  ),
+                  elevation: 2,
+                  shadowColor: Colors.red.withOpacity(0.3),
+                ),
               ),
             ],
           ),
@@ -518,7 +641,7 @@ Future<Map<String, dynamic>?> pickImageAndGetResult(
         fileName = pickedFile.name;
       } else {
         // Mobile အတွက် file path ကိုသာ သိမ်း
-         fileBytes = await pickedFile.readAsBytes();
+        fileBytes = await pickedFile.readAsBytes();
         fileName = pickedFile.path.split('/').last;
       }
 
@@ -546,7 +669,9 @@ void showLanguageDialog(BuildContext context) {
   showDialog(
     context: context,
     builder: (context) => AlertDialog(
-      title: Text('language.select'.tr()), // သို့မဟုတ် သင့်ဘာသာပြန်ချက် key အတိုင်း
+      title: Text(
+        'language.select'.tr(),
+      ), // သို့မဟုတ် သင့်ဘာသာပြန်ချက် key အတိုင်း
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -568,4 +693,162 @@ void showLanguageDialog(BuildContext context) {
       ),
     ),
   );
+}
+
+// Custom TextField widget
+
+class CustomTextField extends StatelessWidget {
+  final String labelText;
+  final String hintText;
+  final TextEditingController controller;
+  final bool isPassword; // Optional
+  final TextInputType keyboardType; // Optional
+
+  const CustomTextField({
+    super.key,
+    required this.labelText,
+    required this.hintText,
+    required this.controller,
+    this.isPassword = false,
+    this.keyboardType = TextInputType.text,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: TextField(
+        controller: controller,
+        obscureText: isPassword,
+        keyboardType: keyboardType,
+        decoration: InputDecoration(
+          labelText: labelText,
+          hintText: hintText,
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: Colors.blue.shade700),
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: const BorderSide(color: Colors.grey, width: 1.5),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: const BorderSide(color: Colors.blue, width: 2),
+          ),
+          prefixIcon: Icon(
+            isPassword ? Icons.lock : Icons.person,
+            color: Colors.blue,
+          ),
+          contentPadding: const EdgeInsets.symmetric(
+            vertical: 16,
+            horizontal: 12,
+          ),
+          filled: true,
+          fillColor: Colors.white,
+        ),
+        style: const TextStyle(color: Colors.black, fontSize: 16),
+      ),
+    );
+  }
+}
+
+// customElevatedButton
+
+class CustomElevatedButton extends StatelessWidget {
+  final VoidCallback? onPressed;
+  final String text;
+  final Color backgroundColor;
+  final Color foregroundColor;
+  final double fontSize;
+  final IconData? icon; // Optional icon
+
+  const CustomElevatedButton({
+    super.key,
+    required this.onPressed,
+    required this.text,
+    this.backgroundColor = Colors.blueAccent,
+    this.foregroundColor = Colors.white,
+    this.fontSize = 16,
+    this.icon,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return ElevatedButton(
+      onPressed: onPressed,
+      style: ElevatedButton.styleFrom(
+        foregroundColor: foregroundColor,
+        backgroundColor: backgroundColor,
+        padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        textStyle: TextStyle(fontSize: fontSize, fontWeight: FontWeight.bold),
+        elevation: 4,
+        shadowColor: backgroundColor.withOpacity(0.5),
+        minimumSize: const Size(200, 50),
+      ),
+      child: icon == null
+          ? Text(text)
+          : Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [Icon(icon), const SizedBox(width: 8), Text(text)],
+            ),
+    );
+  }
+}
+
+//custom dropdown button
+
+class CustomDropdownField<T> extends StatelessWidget {
+  final T? value;
+  final List<DropdownMenuItem<T>> items;
+  final ValueChanged<T?> onChanged;
+  final String labelText;
+  final String hintText;
+  final String? Function(T?)? validator;
+
+  const CustomDropdownField({
+    super.key,
+    required this.value,
+    required this.items,
+    required this.onChanged,
+    required this.labelText,
+    required this.hintText,
+    this.validator,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: DropdownButtonFormField<T>(
+        value: value,
+        onChanged: onChanged,
+        items: items,
+        decoration: InputDecoration(
+          labelText: labelText,
+          hintText: hintText,
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: Colors.blue.shade700),
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: const BorderSide(color: Colors.grey, width: 1.5),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: const BorderSide(color: Colors.blue, width: 2),
+          ),
+          contentPadding: const EdgeInsets.symmetric(
+            vertical: 16,
+            horizontal: 12,
+          ),
+          filled: true,
+          fillColor: Colors.white,
+        ),
+        validator: validator,
+      ),
+    );
+  }
 }

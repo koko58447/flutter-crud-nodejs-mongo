@@ -1,3 +1,4 @@
+import 'package:crudnodejsmongodb/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -81,7 +82,8 @@ class _SupplierFormState extends State<SupplierForm> {
           Navigator.pop(context, true);
         } else {
           _showErrorDialog(
-              "Failed to save supplier. Status code: ${response.statusCode}");
+            "Failed to save supplier. Status code: ${response.statusCode}",
+          );
         }
       } catch (e) {
         _showErrorDialog("An error occurred: $e");
@@ -116,34 +118,41 @@ class _SupplierFormState extends State<SupplierForm> {
             padding: const EdgeInsets.all(8.0),
             child: Column(
               children: [
-                TextFormField(
+                CustomTextField(
+                  labelText: "Name",
+                  hintText: "Enter Name",
                   controller: _nameController,
-                  decoration: const InputDecoration(labelText: 'Name'),
                 ),
-                TextFormField(
+                CustomTextField(
+                  labelText: "Email",
+                  hintText: "Enter Email",
                   controller: _emailController,
-                  decoration: const InputDecoration(labelText: 'Email'),
                 ),
-                TextFormField(
+                CustomTextField(
+                  labelText: "Address",
+                  hintText: "Enter Address",
                   controller: _addressController,
-                  decoration: const InputDecoration(labelText: 'Address'),
                 ),
-                TextFormField(
+                CustomTextField(
+                  labelText: "Phone",
+                  hintText: "Enter Phone",
                   controller: _phoneController,
-                  decoration: const InputDecoration(labelText: 'Phone'),
                 ),
-                TextFormField(
+                CustomTextField(
+                  labelText: "Gmail",
+                  hintText: "Enter Gmail",
                   controller: _gmailController,
-                  decoration: const InputDecoration(labelText: 'Gmail'),
                 ),
-                TextFormField(
+                CustomTextField(
+                  labelText: "Facebook Account",
+                  hintText: "Enter Facebook Account",
                   controller: _fbaccController,
-                  decoration: const InputDecoration(labelText: 'Facebook Account'),
                 ),
                 const SizedBox(height: 20),
-                ElevatedButton(
+                CustomElevatedButton(
                   onPressed: _submitForm,
-                  child: const Text('Submit'),
+                  text: "Save",
+                  icon: Icons.save,
                 ),
               ],
             ),

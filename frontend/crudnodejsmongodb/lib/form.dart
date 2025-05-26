@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'constants.dart';
+import 'utils.dart';
 
 class UserForm extends StatefulWidget {
   final Map? user;
@@ -52,27 +53,35 @@ class _UserFormState extends State<UserForm> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar:
-          AppBar(title: Text(widget.user == null ? 'Add User' : 'Edit User')),
+      appBar: AppBar(
+        title: Text(widget.user == null ? 'Add User' : 'Edit User'),
+      ),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
-            TextField(
-                controller: nameController,
-                decoration: const InputDecoration(labelText: 'Name')),
-            TextField(
-                controller: emailController,
-                decoration: const InputDecoration(labelText: 'Email')),
-            TextField(
+            CustomTextField(
+              labelText: "Name",
+              hintText: "Enter Name",
+              controller: nameController,
+            ),
+            CustomTextField(
+              labelText: "Email",
+              hintText: "Enter Email",
+              controller: emailController,
+            ),
+            CustomTextField(
+              labelText: "Password",
+              hintText: "Enter Password",
               controller: passwordController,
-              decoration: const InputDecoration(
-                labelText: 'Password',
-              ),
-              obscureText: true,
+              isPassword: true,
             ),
             const SizedBox(height: 20),
-            ElevatedButton(onPressed: saveUser, child: const Text('Save'))
+            CustomElevatedButton(
+              onPressed: saveUser,
+              text: 'Save User',
+              icon: Icons.save,
+            ),
           ],
         ),
       ),

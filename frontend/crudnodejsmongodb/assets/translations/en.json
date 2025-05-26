@@ -1,10 +1,17 @@
 {
   "title": "Title",
-  "button": "Change to Burmese",
+  "button": {
+    "add": "Add",
+    "edit": "Edit",
+    "delete": "Delete",
+    "save": "Save",
+    "cancel": "Cancel"
+  },
   "language": {
     "title": "Language",
     "select": "Select Language",
     "english": "English",
     "myanmar": "Myanmar"
   }
+  
 }

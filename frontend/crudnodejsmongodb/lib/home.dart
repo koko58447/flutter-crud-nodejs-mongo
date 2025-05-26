@@ -81,7 +81,75 @@ class _HomeState extends State<Home> {
     final screenWidth = MediaQuery.of(context).size.width;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('User Management')),
+      appBar: AppBar(
+        title: const Text('User Management'),
+        actions: [
+          IconButton(
+            tooltip: "Refresh",
+            icon: const Icon(Icons.refresh),
+            onPressed: fetchAllData,
+          ),
+          PopupMenuButton(
+            tooltip: "Export Data",
+            itemBuilder: (context) => [
+              const PopupMenuItem(
+                value: 'excel',
+                child: Row(
+                  children: [
+                    Icon(Icons.file_download, color: Colors.blue),
+                    Text('Export Excel'),
+                  ],
+                ),
+              ),
+              const PopupMenuItem(
+                value: 'csv',
+                child: Row(
+                  children: [
+                    Icon(Icons.file_download, color: Colors.blue),
+                    Text('Export CSV'),
+                  ],
+                ),
+              ),
+              const PopupMenuItem(
+                value: 'pdf',
+                child: Row(
+                  children: [
+                    Icon(Icons.picture_as_pdf_outlined, color: Colors.blue),
+                    Text('Export PDF'),
+                  ],
+                ),
+              ),
+            ],
+            onSelected: (value) {
+              if (value == 'excel') {
+                createAndShareExcel(
+                  headers: ["Name", "Email"],
+                  rows: filteredUsers
+                      .map((user) => [user['name'], user['email']])
+                      .toList(),
+                  fileName: 'users.xlsx',
+                );
+              } else if (value == 'csv') {
+                createAndShareExportCSV(
+                  headers: ["Name", "Email"],
+                  rows: filteredUsers
+                      .map((user) => [user['name'], user['email']])
+                      .toList(),
+                  fileName: 'users.csv',
+                );
+              } else if (value == 'pdf') {
+                createAndSharePrintPDF(
+                  headers: ["Name", "Email"],
+                  rows: filteredUsers
+                      .map((user) => [user['name'], user['email']])
+                      .toList(),
+                  fileName: 'users.pdf',
+                );
+              }
+            },
+          ),
+        ],
+      ),
       body: Column(
         children: [
           Padding(
@@ -101,113 +169,97 @@ class _HomeState extends State<Home> {
             child: isLoading
                 ? const Center(child: CircularProgressIndicator())
                 : filteredUsers.isEmpty
-                    ? const Center(child: Text("No users found."))
-                    : screenWidth < 600
-                        ? MobileView(
-                            filteredSuppliers:
-                                filteredUsers.cast<Map<String, dynamic>>(),
-                            onEdit: (Map<dynamic, dynamic> user) => handleEdit(
-                              context: context,
-                              list: user,
-                              fetchAllData:
-                                  fetchAllData, // Replace with your fetch function
-                              listFormBuilder: (user) =>
-                                  UserForm(user: user), // Pass UserForm here
-                            ),
-                            onDelete: (Map<dynamic, dynamic> user) =>
-                                handleDelete(
-                              context: context,
-                              list: user,
-                              deleteCallback: (id) async {
-                                final response = await http.delete(
-                                    Uri.parse('$apiBaseUrl/api/users/$id'));
-                                if (response.statusCode != 200) {
-                                  throw Exception("Failed to delete user");
-                                }
-                              },
-                              updateState: (user) {
-                                setState(() {
-                                  users.remove(user);
-                                  filteredUsers = users;
-                                });
-                              },
-                            ),
-                            columns: const [
-                              {'label': 'Name', 'key': 'name'},
-                              {'label': 'Email', 'key': 'email'},
-                            ],
-                          )
-                        : TableView(
-                            filteredSuppliers:
-                                filteredUsers.cast<Map<String, dynamic>>(),
-                            onEdit: (Map<dynamic, dynamic> user) => handleEdit(
-                              context: context,
-                              list: user,
-                              fetchAllData:
-                                  fetchAllData, // Replace with your fetch function
-                              listFormBuilder: (user) =>
-                                  UserForm(user: user), // Pass UserForm here
-                            ),
-                            onDelete: (Map<dynamic, dynamic> user) =>
-                                handleDelete(
-                              context: context,
-                              list: user,
-                              deleteCallback: (id) async {
-                                final response = await http.delete(
-                                    Uri.parse('$apiBaseUrl/api/users/$id'));
-                                if (response.statusCode != 200) {
-                                  throw Exception("Failed to delete user");
-                                }
-                              },
-                              updateState: (user) {
-                                setState(() {
-                                  users.remove(user);
-                                  filteredUsers = users;
-                                });
-                              },
-                            ),
-                            columns: const [
-                              {'label': 'Name', 'key': 'name'},
-                              {'label': 'Email', 'key': 'email'},
-                            ],
-                            title: 'User Lists',
-                          ),
+                ? const Center(child: Text("No users found."))
+                : screenWidth < 600
+                ? MobileView(
+                    filteredSuppliers: filteredUsers
+                        .cast<Map<String, dynamic>>(),
+                    onEdit: (Map<dynamic, dynamic> user) => handleEdit(
+                      context: context,
+                      list: user,
+                      fetchAllData:
+                          fetchAllData, // Replace with your fetch function
+                      listFormBuilder: (user) =>
+                          UserForm(user: user), // Pass UserForm here
+                    ),
+                    onDelete: (Map<dynamic, dynamic> user) => handleDelete(
+                      context: context,
+                      list: user,
+                      deleteCallback: (id) async {
+                        final response = await http.delete(
+                          Uri.parse('$apiBaseUrl/api/users/$id'),
+                        );
+                        if (response.statusCode != 200) {
+                          throw Exception("Failed to delete user");
+                        }
+                      },
+                      updateState: (user) {
+                        setState(() {
+                          users.remove(user);
+                          filteredUsers = users;
+                        });
+                      },
+                    ),
+                    columns: const [
+                      {'label': 'Name', 'key': 'name'},
+                      {'label': 'Email', 'key': 'email'},
+                    ],
+                  )
+                : TableView(
+                    filteredSuppliers: filteredUsers
+                        .cast<Map<String, dynamic>>(),
+                    onEdit: (Map<dynamic, dynamic> user) => handleEdit(
+                      context: context,
+                      list: user,
+                      fetchAllData:
+                          fetchAllData, // Replace with your fetch function
+                      listFormBuilder: (user) =>
+                          UserForm(user: user), // Pass UserForm here
+                    ),
+                    onDelete: (Map<dynamic, dynamic> user) => handleDelete(
+                      context: context,
+                      list: user,
+                      deleteCallback: (id) async {
+                        final response = await http.delete(
+                          Uri.parse('$apiBaseUrl/api/users/$id'),
+                        );
+                        if (response.statusCode != 200) {
+                          throw Exception("Failed to delete user");
+                        }
+                      },
+                      updateState: (user) {
+                        setState(() {
+                          users.remove(user);
+                          filteredUsers = users;
+                        });
+                      },
+                    ),
+                    columns: const [
+                      {'label': 'Name', 'key': 'name'},
+                      {'label': 'Email', 'key': 'email'},
+                    ],
+                    title: 'User Lists',
+                  ),
           ),
         ],
       ),
-      floatingActionButton: SpeedDial(
-        icon: Icons.add, // Main FAB icon
-        activeIcon: Icons.close, // Icon when FAB is expanded
-        backgroundColor: Colors.blue,
+      floatingActionButton: FloatingActionButton(
+        tooltip: "Add User",
+        onPressed: () async {
+          await navigateAndRefresh(
+            context: context,
+            formBuilder: () => const UserForm(),
+            fetchAllData: fetchAllData,
+          );
+        },
+        backgroundColor: Colors.blueAccent,
         foregroundColor: Colors.white,
-        children: [
-          SpeedDialChild(
-            child: const Icon(Icons.file_download),
-            label: 'Export CSV',
-            backgroundColor: Colors.green,
-            onTap: () => createAndShareExcel(headers: ["Name", "Email"], rows: filteredUsers.map((user) => [user['name'], user['email']]).toList(),
-              fileName: 'users.csv'),
-          ),
-          SpeedDialChild(
-            child: const Icon(Icons.table_chart),
-            label: 'Export Excel',
-            backgroundColor: Colors.orange,
-            onTap: () => createAndShareExcel(headers: ["Name", "Email"], rows: filteredUsers.map((user) => [user['name'], user['email']]).toList(),
-              fileName: 'users.xlsx'),
-          ),
-          SpeedDialChild(
-            child: const Icon(Icons.add),
-            label: 'Add User',
-            backgroundColor: Colors.blue,
-            onTap: () async {
-              await navigateAndRefresh(
-                context: context,
-                formBuilder: () => const UserForm(), // Pass the form widget
-                fetchAllData: fetchAllData, // Pass the data refresh function
-              );
-            },
-          ),
-        ],
+        elevation: 6,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(30), // အဝိုင်းပုံစံ
+          side: BorderSide(color: Colors.grey.shade300, width: 1.5),
+        ),
+        child: const Icon(Icons.add, size: 30),
       ),
     );
   }
