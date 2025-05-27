@@ -16,6 +16,98 @@ import 'package:universal_html/html.dart' as mylib;
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
+import 'package:flutter_typeahead/flutter_typeahead.dart';
+
+Widget customAutoCompleteField<T>({
+  required Future<List<T>> Function(String pattern) suggestionsCallback,
+  required Widget Function(BuildContext context, T item) itemBuilder,
+  required void Function(T item) onSelected,
+  required String labelText,
+}) {
+  return TypeAheadField<T>(
+    suggestionsCallback: suggestionsCallback,
+    builder: (context, controller, focusNode) {
+      return TextField(
+        controller: controller,
+        focusNode: focusNode,
+        autofocus: true,
+        enabled: true,
+        decoration: InputDecoration(
+          border: OutlineInputBorder(),
+          labelText: labelText,
+        ),
+      );
+    },
+    itemBuilder: itemBuilder,
+    onSelected: onSelected,
+  );
+}
+
+Widget customAutoCompleteObjects<T>({
+  required Future<List<T>> Function(String pattern) suggestionsCallback,
+  required String labelText,
+  required void Function(T item) onSelected,
+  required Widget Function(BuildContext context, T item) itemBuilder,
+  required String Function(T item) displayProperty,
+}) {
+  return Padding(
+    padding: const EdgeInsets.all(8.0),
+    child: TypeAheadField<T>(
+      suggestionsCallback: suggestionsCallback,
+      builder: (context, controller, focusNode) {
+        return TextField(
+          controller: controller,
+          focusNode: focusNode,
+          autofocus: true,
+          enabled: true,
+          decoration: InputDecoration(
+            border: OutlineInputBorder(),
+            labelText: labelText,
+          ),
+        );
+      },
+      itemBuilder: itemBuilder,
+      onSelected: onSelected,
+    ),
+  );
+}
+
+Widget customeAutoCompleteStrings({
+  required List<String> suggestions,
+  required String labelText,
+  required void Function(String suggestion) onSelected,
+}) {
+  return Padding(
+    padding: const EdgeInsets.all(8.0),
+    child: TypeAheadField<String>(
+      suggestionsCallback: (pattern) async {
+        return suggestions
+            .where((city) => city.toLowerCase().contains(pattern.toLowerCase()))
+            .toList();
+      },
+      builder: (context, controller, focusNode) {
+        return TextField(
+          controller: controller,
+          focusNode: focusNode,
+          autofocus: true,
+          enabled: true,
+          decoration: InputDecoration(
+            border: OutlineInputBorder(),
+            labelText: labelText,
+          ),
+        );
+      },
+      itemBuilder: (context, suggestion) {
+        return ListTile(title: Text(suggestion));
+      },
+      onSelected: (suggestion) {
+        onSelected(suggestion);
+      },
+    ),
+  );
+}
+
+// 📄 PDF ဖန်တီးပြီး Share လုပ်ခြင်း
 
 Future<void> createAndSharePrintPDF({
   required List<String> headers,
@@ -141,6 +233,33 @@ Future<void> createAndShareExcel({
     await Share.shareXFiles([
       XFile(file.path),
     ], text: 'Please check the attached Excel file.');
+  }
+}
+
+//download image file
+void downloadImageFile(String url, String filename, BuildContext context) {
+  if (kIsWeb) {
+    // 🔁 Web အတွက် – universal_html သုံးပြီး download လုပ်တယ်
+    final request = mylib.HttpRequest();
+    request.open("GET", url, async: true);
+    request.responseType = "blob";
+
+    request.onLoadEnd.listen((_) {
+      final blob = request.response as mylib.Blob;
+      final url = mylib.Url.createObjectUrlFromBlob(blob);
+      final anchor = mylib.AnchorElement()
+        ..href = url
+        ..download = filename;
+
+      mylib.document.body?.append(anchor);
+      anchor.click();
+      anchor.remove();
+      mylib.Url.revokeObjectUrl(url);
+    });
+
+    request.send();
+  } else {
+    // 📱 Mobile အတွက် – image_gallery_saver သုံးပါ
   }
 }
 
@@ -695,32 +814,60 @@ void showLanguageDialog(BuildContext context) {
   );
 }
 
-// Custom TextField widget
+//custom search filed
 
+Widget customSearchField({
+  required TextEditingController controller,
+  required String hintText,
+  IconData prefixIcon = Icons.search,
+  double borderRadius = 8.0,
+  EdgeInsets padding = const EdgeInsets.all(8.0),
+}) {
+  return Padding(
+    padding: padding,
+    child: TextField(
+      controller: controller,
+      decoration: InputDecoration(
+        hintText: hintText,
+        prefixIcon: Icon(prefixIcon),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(borderRadius),
+        ),
+      ),
+    ),
+  );
+}
+
+// Custom TextField widget
 class CustomTextField extends StatelessWidget {
   final String labelText;
   final String hintText;
   final TextEditingController controller;
-  final bool isPassword; // Optional
-  final TextInputType keyboardType; // Optional
+  final String? Function(String?)? validator; // For validation
+  final bool isPassword;
+  final TextInputType keyboardType;
+  final IconData prefixIcon;
 
   const CustomTextField({
     super.key,
     required this.labelText,
     required this.hintText,
     required this.controller,
+    this.validator,
     this.isPassword = false,
     this.keyboardType = TextInputType.text,
+    this.prefixIcon = Icons.import_contacts, // default icon
   });
 
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.all(8.0),
-      child: TextField(
+      child: TextFormField(
         controller: controller,
         obscureText: isPassword,
         keyboardType: keyboardType,
+        validator: validator, // Form validation here
         decoration: InputDecoration(
           labelText: labelText,
           hintText: hintText,
@@ -737,7 +884,7 @@ class CustomTextField extends StatelessWidget {
             borderSide: const BorderSide(color: Colors.blue, width: 2),
           ),
           prefixIcon: Icon(
-            isPassword ? Icons.lock : Icons.person,
+            isPassword ? Icons.lock : prefixIcon,
             color: Colors.blue,
           ),
           contentPadding: const EdgeInsets.symmetric(
@@ -752,7 +899,6 @@ class CustomTextField extends StatelessWidget {
     );
   }
 }
-
 // customElevatedButton
 
 class CustomElevatedButton extends StatelessWidget {

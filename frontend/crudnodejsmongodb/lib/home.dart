@@ -152,18 +152,9 @@ class _HomeState extends State<Home> {
       ),
       body: Column(
         children: [
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: TextField(
-              controller: searchController,
-              decoration: InputDecoration(
-                hintText: "Search by name or email",
-                prefixIcon: const Icon(Icons.search),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-              ),
-            ),
+          customSearchField(
+            controller: searchController,
+            hintText: "Search By name or email",
           ),
           Expanded(
             child: isLoading

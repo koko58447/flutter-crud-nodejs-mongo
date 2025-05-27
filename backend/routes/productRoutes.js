@@ -18,7 +18,7 @@ router.post('/', async (req, res) => {
 // Get all products
 router.get('/', async (req, res) => {
     try {
-        const products = await Product.find().populate('supplierid', 'name').populate('categoryid','name'); // Populate supplier name
+        const products = await Product.find().populate('supplierid', 'name').populate('categoryid','name').sort({'_id':-1}); // Populate supplier name
         res.status(200).json(products);
     } catch (error) {
         res.status(500).json({ error: error.message });

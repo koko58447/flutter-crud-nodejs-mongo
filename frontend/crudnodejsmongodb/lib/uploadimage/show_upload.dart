@@ -1,7 +1,8 @@
+import 'package:share_plus/share_plus.dart';
+
 import '/uploadimage/form_upload.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'dart:convert';
 import '../constants.dart';
 import '../utils.dart';
 
@@ -304,6 +305,18 @@ class FullScreenImage extends StatelessWidget {
         backgroundColor: Colors.black,
         iconTheme: const IconThemeData(color: Colors.white),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.download),
+            onPressed: () =>
+                downloadImageFile(imageUrl, 'downloaded_image.jpg', context),
+          ),
+          IconButton(
+            icon: const Icon(Icons.share),
+            onPressed: () {
+              // Share image URL
+              Share.share(imageUrl);
+            },
+          ),
           IconButton(
             icon: const Icon(Icons.delete),
             onPressed: () async {

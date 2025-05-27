@@ -2,7 +2,6 @@ import '/category/formcategory.dart';
 import 'package:flutter/material.dart';
 import '../utils.dart';
 import '../constants.dart';
-import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:http/http.dart' as http;
 
 class ShowCategory extends StatefulWidget {
@@ -13,8 +12,8 @@ class ShowCategory extends StatefulWidget {
 }
 
 class _ShowCategoryState extends State<ShowCategory> {
-  List categorys = [];
-  List filterCategory = [];
+  List<Map<String, dynamic>> categorys = [];
+  List<Map<String, dynamic>> filterCategory = [];
   bool isLoading = true;
   final searchController = TextEditingController();
 
@@ -22,8 +21,9 @@ class _ShowCategoryState extends State<ShowCategory> {
     await fetchData(
       apiPath: '$apiBaseUrl/api/categorys',
       onSuccess: (data) {
+        print(data);
         setState(() {
-          categorys = data;
+          categorys = data.cast<Map<String, dynamic>>();
           filterCategory = categorys;
         });
       },
@@ -159,18 +159,9 @@ class _ShowCategoryState extends State<ShowCategory> {
       ),
       body: Column(
         children: [
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: TextField(
-              controller: searchController,
-              decoration: InputDecoration(
-                hintText: "Search by name",
-                prefixIcon: const Icon(Icons.search),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-              ),
-            ),
+          customSearchField(
+            controller: searchController,
+            hintText: "Search by name",
           ),
           Expanded(
             child: isLoading

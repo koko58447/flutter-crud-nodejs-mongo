@@ -53,7 +53,7 @@ router.get('/searchdate', async (req, res) => {
       query.createdAt = { $gte: new Date(startDate), $lte: new Date(endDate) };
     }
     try {
-      const suppliers = await Supplier.find(query);
+      const suppliers = await Supplier.find(query).sort({ _id: -1 });
       res.json(suppliers);
     } catch (error) {
       console.error('Error:', error); // Log errors

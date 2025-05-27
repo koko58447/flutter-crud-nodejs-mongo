@@ -1,3 +1,9 @@
+import 'videos/viewvideos.dart';
+
+import 'autocomplete1.dart';
+
+import 'autocomplete.dart';
+
 import 'barcodescanner/barcodescanner.dart';
 import 'barcodescanner/invoicceprinter.dart';
 import 'category/showcategory.dart';
@@ -17,10 +23,11 @@ import 'videos/showvideos.dart';
 
 import 'package:easy_localization/easy_localization.dart';
 import 'utils.dart';
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await EasyLocalization.ensureInitialized();
- 
+
   runApp(
     EasyLocalization(
       supportedLocales: [Locale('en'), Locale('my')],
@@ -30,7 +37,6 @@ void main() async {
     ),
   );
 }
-
 
 class MyApp extends StatelessWidget {
   const MyApp({Key? key}) : super(key: key);
@@ -66,11 +72,38 @@ class _ResponsiveLayoutState extends State<ResponsiveLayout> {
       child: ListView(
         padding: EdgeInsets.zero,
         children: [
-          const DrawerHeader(
-            decoration: BoxDecoration(color: Colors.blue),
-            child: Text(
-              'Menu',
-              style: TextStyle(color: Colors.white, fontSize: 24),
+          DrawerHeader(
+            decoration: const BoxDecoration(color: Colors.blue),
+            child: Center(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  // 🖼️ Image
+                  CircleAvatar(
+                    radius: 50,
+                    child: ClipOval(
+                      child: Image.asset(
+                        'assets/images/logo.png',
+                        width: 100,
+                        height: 100,
+                        fit: BoxFit.fitWidth,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 5),
+
+                  // 📝 Text
+                  const Text(
+                    'Flutter CRUD',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
           ListTile(
@@ -230,7 +263,7 @@ class _ResponsiveLayoutState extends State<ResponsiveLayout> {
               }
             },
           ),
-           ListTile(
+          ListTile(
             leading: const Icon(Icons.print),
             title: Text(
               'Excel',
@@ -249,12 +282,50 @@ class _ResponsiveLayoutState extends State<ResponsiveLayout> {
               }
             },
           ),
+          ListTile(
+            leading: const Icon(Icons.text_fields),
+            title: Text(
+              'Auto Complete',
+              style: TextStyle(
+                color: _selectedItem == 'Auto Complete'
+                    ? Colors.blue
+                    : Colors.black,
+              ),
+            ),
+            onTap: () {
+              setState(() {
+                _selectedItem = 'Auto Complete'; // Update selected item
+                _currentContent =
+                    AutoCompleteExample(); // Update content to Home widget
+              });
+              if (MediaQuery.of(context).size.width < 1200) {
+                Navigator.pop(context); // Close the drawer
+              }
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.video_call),
+            title: Text(
+              'Upload Video',
+              style: TextStyle(
+                color: _selectedItem == 'Upload Video'
+                    ? Colors.blue
+                    : Colors.black,
+              ),
+            ),
+            onTap: () {
+              setState(() {
+                _selectedItem = 'Upload Video'; // Update selected item
+                _currentContent = Viewvideos(); // Update content to Home widget
+              });
+              if (MediaQuery.of(context).size.width < 1200) {
+                Navigator.pop(context); // Close the drawer
+              }
+            },
+          ),
         ],
       ),
     );
-
-
-    
 
     return WillPopScope(
       onWillPop: () async {
@@ -266,26 +337,31 @@ class _ResponsiveLayoutState extends State<ResponsiveLayout> {
             // Desktop layout with persistent drawer
             return Scaffold(
               appBar: AppBar(
+                backgroundColor: Colors.blue,
+                foregroundColor: Colors.white,
                 title: Text(tr('title')), // Use translation key
                 actions: [
                   GestureDetector(
-                    onTap:(){
+                    onTap: () {
                       showLanguageDialog(context);
                     },
                     child: Padding(
-                        padding: EdgeInsets.all(8.0),
-                        child: Row(
-                          children: [
-                            Icon(Icons.language),
-                            SizedBox(width: 4),
-                            Text('Language'),
-                            Text(
-                                '(' + getCurrentLanguageLabel(context) + ')',
-                                style: const TextStyle(fontSize: 12, color: Colors.grey),
-                              ),
-                          ],
-                        ),
+                      padding: EdgeInsets.all(8.0),
+                      child: Row(
+                        children: [
+                          Icon(Icons.language),
+                          SizedBox(width: 4),
+                          Text('Language'),
+                          Text(
+                            '(' + getCurrentLanguageLabel(context) + ')',
+                            style: const TextStyle(
+                              fontSize: 12,
+                              color: Colors.grey,
+                            ),
+                          ),
+                        ],
                       ),
+                    ),
                   ),
                   GestureDetector(
                     onTap: () {
@@ -369,7 +445,9 @@ class _ResponsiveLayoutState extends State<ResponsiveLayout> {
             // Mobile/Tablet layout with sliding drawer
             return Scaffold(
               appBar: AppBar(
-                title:  Text(tr('title')),
+                backgroundColor: Colors.blue,
+                foregroundColor: Colors.white,
+                title: Text(tr('title')),
                 actions: [
                   PopupMenuButton<String>(
                     onSelected: (value) {
@@ -411,9 +489,8 @@ class _ResponsiveLayoutState extends State<ResponsiveLayout> {
                             builder: (context) => SettingPage(),
                           ), // Navigate to SettingPage
                         );
-                      }
-                      else if (value == 'Language') {
-      // Show language selection dialog
+                      } else if (value == 'Language') {
+                        // Show language selection dialog
                         showLanguageDialog(context);
                       }
                     },
@@ -421,15 +498,18 @@ class _ResponsiveLayoutState extends State<ResponsiveLayout> {
                       PopupMenuItem(
                         value: 'Language',
                         child: Row(
-        children: [
-          const Text("Language"), // "Language"
-          const SizedBox(width: 8),
-          Text(
-            '(' + getCurrentLanguageLabel(context) + ')',
-            style: const TextStyle(fontSize: 12, color: Colors.grey),
-          ),
-        ],
-      ),
+                          children: [
+                            const Text("Language"), // "Language"
+                            const SizedBox(width: 8),
+                            Text(
+                              '(' + getCurrentLanguageLabel(context) + ')',
+                              style: const TextStyle(
+                                fontSize: 12,
+                                color: Colors.grey,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                       const PopupMenuItem(
                         value: 'Setting',
@@ -451,5 +531,4 @@ class _ResponsiveLayoutState extends State<ResponsiveLayout> {
       ),
     );
   }
-
 }
