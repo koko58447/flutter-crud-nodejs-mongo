@@ -1,4 +1,4 @@
-import 'package:crudnodejsmongodb/videos/showvideos.dart'; // သင့်ရဲ့ video player screen
+import 'package:crudnodejsmongodb/videos/showvideos.dart';
 import 'package:crudnodejsmongodb/videos/videoplayerscreen.dart';
 import 'package:flutter/material.dart';
 import '../constants.dart';
@@ -78,7 +78,6 @@ class _ViewvideosState extends State<Viewvideos> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Videos'), centerTitle: true),
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
           : Column(
@@ -89,55 +88,113 @@ class _ViewvideosState extends State<Viewvideos> {
                     controller: searchController,
                     decoration: InputDecoration(
                       labelText: 'Search by Name',
-                      border: OutlineInputBorder(),
+                      prefixIcon: Icon(Icons.search),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(30),
+                      ),
                     ),
                   ),
                 ),
                 Expanded(
                   child: filteredUploads.isEmpty
                       ? Center(child: Text("No videos found"))
-                      : ListView.builder(
+                      : ListView.separated(
                           itemCount: filteredUploads.length,
+                          separatorBuilder: (context, index) =>
+                              Divider(height: 1, color: Colors.grey.shade300),
                           itemBuilder: (context, index) {
                             final video = filteredUploads[index];
                             final videoUrl = video['path'];
-                            final videoName = video['name'];
+                            final videoName = video['name'] ?? 'Unnamed Video';
+                            final videoAuthor =
+                                'Uploader'; // သင့် API မှာရှိရင်ထည့်ပါ
 
-                            return Card(
-                              elevation: 3,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              margin: EdgeInsets.symmetric(
-                                horizontal: 16,
-                                vertical: 8,
-                              ),
-                              child: InkWell(
-                                onTap: () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => VideoPlayerScreen(
-                                        videoUrl: videoUrl,
-                                        videoName: videoName,
+                            return InkWell(
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => VideoPlayerScreen(
+                                      id: video['_id'],
+                                      videoUrl: videoUrl,
+                                      videoName: videoName,
+                                    ),
+                                  ),
+                                ).then((value) {
+                                  if (value == true) {
+                                    fetchAllData();
+                                  }
+                                });
+                              },
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 12,
+                                  vertical: 8,
+                                ),
+                                child: Row(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    // 🔘 Video Thumbnail
+                                    Container(
+                                      width: 120,
+                                      height: 90,
+                                      decoration: BoxDecoration(
+                                        color: Colors.black12,
+                                        borderRadius: BorderRadius.circular(6),
+                                        image: DecorationImage(
+                                          fit: BoxFit.cover,
+                                          image: NetworkImage(
+                                            "https://via.placeholder.com/150x100.png?text=Preview ",
+                                          ),
+                                        ),
                                       ),
                                     ),
-                                  );
-                                },
-                                child: ListTile(
-                                  leading: CircleAvatar(
-                                    backgroundColor: Colors.blueAccent,
-                                    child: Icon(Icons.video_library),
-                                  ),
-                                  title: Text(
-                                    videoName,
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 18,
+
+                                    SizedBox(width: 12),
+
+                                    // 📄 Video Info
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            videoName,
+                                            maxLines: 2,
+                                            overflow: TextOverflow.ellipsis,
+                                            style: TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 16,
+                                            ),
+                                          ),
+                                          SizedBox(height: 4),
+                                          Text(
+                                            videoAuthor,
+                                            style: TextStyle(
+                                              color: Colors.grey.shade700,
+                                              fontSize: 14,
+                                            ),
+                                          ),
+                                          SizedBox(height: 4),
+                                          Text(
+                                            videoUrl,
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                            style: TextStyle(
+                                              color: Colors.blue,
+                                              fontSize: 13,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
                                     ),
-                                  ),
-                                  subtitle: Text(videoUrl),
-                                  trailing: Icon(Icons.arrow_forward_ios),
+
+                                    Icon(
+                                      Icons.arrow_forward_ios,
+                                      size: 16,
+                                      color: Colors.grey.shade600,
+                                    ),
+                                  ],
                                 ),
                               ),
                             );
@@ -155,7 +212,7 @@ class _ViewvideosState extends State<Viewvideos> {
             fetchAllData: fetchAllData,
           );
         },
-        backgroundColor: Colors.blueAccent,
+        backgroundColor: Colors.redAccent,
         foregroundColor: Colors.white,
         elevation: 6,
         shape: RoundedRectangleBorder(

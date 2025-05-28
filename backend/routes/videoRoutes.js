@@ -1,8 +1,8 @@
 const express = require('express');
-const multer = require('multer');
+const multer = require('multer'); 
 const path = require('path');
 const Video = require('../models/Video');
-const fs=require('fs');
+const fs = require('fs/promises');
 
 const router = express.Router();
 
@@ -39,7 +39,6 @@ router.post('/upload', upload.single('video'), async (req, res) => {
 router.get('/', async (req, res) => {
     try {
         const uploads = await Video.find().sort({ _id: -1 });
-        console.log(uploads);
         res.json(uploads);
     } catch (err) {
         res.status(500).json({ error: err.message });
@@ -49,7 +48,7 @@ router.get('/', async (req, res) => {
 // Update a supplier
 router.put('/:id', async (req, res) => {
     try {
-        const updatedUpload = await Upload.findByIdAndUpdate(req.params.id, req.body, { new: true });
+        const updatedUpload = await Video.findByIdAndUpdate(req.params.id, req.body, { new: true });
         if (!updatedUpload) return res.status(404).json({ error: "Supplier not found" });
         res.json(updatedUpload);
     } catch (err) {
@@ -60,23 +59,35 @@ router.put('/:id', async (req, res) => {
 // Delete an uploaded file by ID
 router.delete('/:id', async (req, res) => {
     try {
-        const upload = await Upload.findById(req.params.id);
+        const { id } = req.params;
+
+        console.log("Deleting file with ID:", id);
+
+        const upload = await Video.findById(id);
         if (!upload) {
             return res.status(404).json({ error: 'File not found' });
         }
 
-        // Delete the file from the filesystem
-        fs.unlink(upload.path, async (err) => {
-            if (err && err.code !== 'ENOENT') {
-                return res.status(500).json({ error: 'Failed to delete file from server' });
-            }
+        // const filePath = path.resolve(__dirname, '..', upload.path);
+        const filePath = path.join(__dirname,'..',  upload.path);
+        console.log("Attempting to delete file at:", filePath);
 
-            // Remove the file record from the database
-            await Upload.findByIdAndDelete(req.params.id); // Corrected method
-            res.json({ message: 'File deleted successfully' });
-        });
+        try {
+            await fs.unlink(filePath); // ✅ ဒါက fs.promises ဖြစ်နေတယ်
+        } catch (err) {
+            if (err.code === 'ENOENT') {
+                console.warn("File already deleted");
+            } else {
+                throw err;
+            }
+        }
+
+        await Video.findByIdAndDelete(id);
+        res.json({ message: 'File deleted successfully' });
+
     } catch (err) {
-        res.status(500).json({ error: err.message });
+        console.error("Error deleting file:", err);
+        res.status(500).json({ error: err.message || 'Failed to delete file' });
     }
 });
 

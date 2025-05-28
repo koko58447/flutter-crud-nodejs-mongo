@@ -57,6 +57,7 @@ router.put('/:id', async (req, res) => {
 // Delete an uploaded file by ID
 router.delete('/:id', async (req, res) => {
     try {
+        console.log(req.params.id);
         const upload = await Upload.findById(req.params.id);
         if (!upload) {
             return res.status(404).json({ error: 'File not found' });
@@ -64,6 +65,8 @@ router.delete('/:id', async (req, res) => {
 
         // Delete the file from the filesystem
         fs.unlink(upload.path, async (err) => {
+
+            
             if (err && err.code !== 'ENOENT') {
                 return res.status(500).json({ error: 'Failed to delete file from server' });
             }

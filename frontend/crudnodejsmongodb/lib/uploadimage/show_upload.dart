@@ -302,6 +302,7 @@ class FullScreenImage extends StatelessWidget {
     return Scaffold(
       backgroundColor: Colors.black,
       appBar: AppBar(
+        title: const Text('Full Screen Image'),
         backgroundColor: Colors.black,
         iconTheme: const IconThemeData(color: Colors.white),
         actions: [
@@ -314,6 +315,7 @@ class FullScreenImage extends StatelessWidget {
             icon: const Icon(Icons.share),
             onPressed: () {
               // Share image URL
+              print("Sharing image URL: $imageUrl");
               Share.share(imageUrl);
             },
           ),

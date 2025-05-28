@@ -18,6 +18,7 @@ import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
 
+//custom autocomplete field
 Widget customAutoCompleteField<T>({
   required Future<List<T>> Function(String pattern) suggestionsCallback,
   required Widget Function(BuildContext context, T item) itemBuilder,
